@@ -5,7 +5,7 @@
  * module below short-circuits to local data when MOCK_MODE is true. Flip it to
  * `false` to go back to real HTTP calls against the Express server.
  */
-export const MOCK_MODE = true;
+export const MOCK_MODE = false;
 
 /** Simulate network latency so loading/skeleton states still show. */
 export function mockDelay(ms = 320): Promise<void> {

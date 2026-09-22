@@ -20,7 +20,7 @@ import {
   ArrowRight,
   BarChart3,
   Briefcase,
-  FileSpreadsheet
+  FileSpreadsheet,
   CalendarDays,
   CheckCircle2,
   ClipboardList,

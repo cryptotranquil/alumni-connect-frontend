@@ -7,7 +7,7 @@
     "module": "ESNext",
     "types": ["vite/client"],
     "skipLibCheck": true,
-
+    
     /* Keep the alias relative to this config; baseUrl is deprecated in TypeScript 6. */
     "paths": {
       "@/*": ["./src/*"]
