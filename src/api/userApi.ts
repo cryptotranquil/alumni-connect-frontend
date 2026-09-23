@@ -306,7 +306,9 @@ export async function uploadCvApi(
   try {
     const formData = new FormData();
     formData.append("cv", file);
-    const { data } = await api.post<{ cvUrl: string; user: User }>("/cv", formData);
+    const { data } = await api.post<{ cvUrl: string; user: User }>("/cv", formData, {
+      headers: { "Content-Type": undefined },
+    });
     return data;
   } catch (e) {
     throw new Error(getErrorMessage(e, "Failed to upload CV"));
@@ -328,6 +330,7 @@ export async function uploadPhotoApi(
     const { data } = await api.post<{ profilePhoto: string; user: User }>(
       "/profile/photo",
       formData,
+      { headers: { "Content-Type": undefined } },
     );
     return data;
   } catch (e) {

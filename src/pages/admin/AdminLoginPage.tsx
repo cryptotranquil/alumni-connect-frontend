@@ -17,6 +17,19 @@ const AdminLoginPage = () => {
     setLoading(true);
     try {
       const result = await login(form.email, form.password);
+      if (result.twoFactorRequired) {
+        navigate("/verify-2fa", {
+          state: {
+            twoFactorToken: result.twoFactorToken,
+            destination: result.destination,
+            codeExpiresInSeconds: result.codeExpiresInSeconds,
+            devCode: result.devCode,
+            redirectTo: "/admin",
+            requireAdmin: true,
+          },
+        });
+        return;
+      }
       if (result.user.role !== "admin") {
         setError("This portal is restricted to administrators.");
         setLoading(false);

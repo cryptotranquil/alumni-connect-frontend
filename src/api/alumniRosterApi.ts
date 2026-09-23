@@ -241,6 +241,7 @@ export async function importRosterFileApi(
     const { data } = await api.post<RosterImportResult>(
       `/admin/alumni-roster/import?dryRun=${dryRun}`,
       formData,
+      { headers: { "Content-Type": undefined } },
     );
     return data;
   } catch (e) {

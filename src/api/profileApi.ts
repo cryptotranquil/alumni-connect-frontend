@@ -247,7 +247,13 @@ export async function changeProfilePhotoApi(
   if (!MOCK_MODE) {
     const formData = new FormData();
     formData.append(kind === "cover" ? "cover" : "photo", file);
-    await api.post("/profile/media", formData);
+    // The axios instance defaults Content-Type to application/json; when that
+    // header is present axios JSON-stringifies FormData instead of sending it
+    // as multipart. Clearing it here lets the browser set the correct
+    // multipart/form-data boundary itself.
+    await api.post("/profile/media", formData, {
+      headers: { "Content-Type": undefined },
+    });
     return;
   }
   await mockDelay();

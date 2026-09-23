@@ -7,7 +7,14 @@ import {
 } from "react";
 import { api, getErrorMessage } from "../api/client";
 import { MOCK_MODE } from "../api/mockMode";
-import { loginApi, registerApi } from "../api/authApi";
+import {
+  loginApi,
+  registerApi,
+  loginRawApi,
+  verifyTwoFactorApi,
+  resendTwoFactorApi,
+  type TwoFactorChallenge,
+} from "../api/authApi";
 
 export type UserRole = "student" | "alumni" | "admin";
 
@@ -41,7 +48,15 @@ interface AuthContextType {
   login: (
     email: string,
     password: string,
+  ) => Promise<
+    | { twoFactorRequired: false; mustChangePassword: boolean; user: User }
+    | TwoFactorChallenge
+  >;
+  completeLogin: (
+    twoFactorToken: string,
+    code: string,
   ) => Promise<{ mustChangePassword: boolean; user: User }>;
+  resendLoginCode: (twoFactorToken: string) => Promise<{ codeExpiresInSeconds: number; devCode?: string }>;
   registerStudent: (data: Record<string, string>) => Promise<void>;
   registerFirstAdmin: (data: Record<string, string>) => Promise<void>;
   registerAlumni: (
@@ -114,23 +129,48 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const auth = await loginApi(email, password);
       const mustChangePassword = auth.mustChangePassword === true;
       persist({ ...auth, mustChangePassword });
-      return { mustChangePassword, user: auth };
+      return { twoFactorRequired: false as const, mustChangePassword, user: auth };
     }
     try {
-      const { data } = await api.post<{
-        user: User;
-        token: string;
-        message?: string;
-        mustChangePassword?: boolean;
-      }>("/login", { email, password });
-      if (!data.user || !data.token)
-        throw new Error(data.message || "Login failed");
-      const mustChangePassword =
-        data.mustChangePassword === true || !!data.user.mustChangePassword;
-      persist({ ...data.user, token: data.token, mustChangePassword });
-      return { mustChangePassword, user: data.user };
+      const result = await loginRawApi(email, password);
+      if (result.twoFactorRequired) {
+        return result;
+      }
+      persist({
+        ...result.user,
+        token: result.user.token,
+        mustChangePassword: result.mustChangePassword,
+      });
+      return {
+        twoFactorRequired: false as const,
+        mustChangePassword: result.mustChangePassword,
+        user: result.user,
+      };
     } catch (e) {
       throw new Error(getErrorMessage(e, "Login failed"));
+    }
+  };
+
+  /** Submit the emailed 6-digit code for a login started by `login()`. */
+  const completeLogin = async (twoFactorToken: string, code: string) => {
+    try {
+      const { user: authUser, mustChangePassword } = await verifyTwoFactorApi(
+        twoFactorToken,
+        code,
+      );
+      persist({ ...authUser, token: authUser.token, mustChangePassword });
+      return { mustChangePassword, user: authUser };
+    } catch (e) {
+      throw new Error(getErrorMessage(e, "Incorrect code."));
+    }
+  };
+
+  /** Ask the backend to email a fresh 6-digit code for an in-progress login. */
+  const resendLoginCode = async (twoFactorToken: string) => {
+    try {
+      return await resendTwoFactorApi(twoFactorToken);
+    } catch (e) {
+      throw new Error(getErrorMessage(e, "Could not resend the code."));
     }
   };
 
@@ -218,6 +258,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         user,
         loading,
         login,
+        completeLogin,
+        resendLoginCode,
         registerStudent,
         registerFirstAdmin,
         registerAlumni,

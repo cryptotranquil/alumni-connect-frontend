@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const LoginForm = () => {
   const { login, logout } = useAuth();
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -22,7 +23,20 @@ const LoginForm = () => {
     setError("");
     setLoading(true);
     try {
-      const { mustChangePassword, user } = await login(form.email, form.password);
+      const result = await login(form.email, form.password);
+      if (result.twoFactorRequired) {
+        navigate("/verify-2fa", {
+          state: {
+            twoFactorToken: result.twoFactorToken,
+            destination: result.destination,
+            codeExpiresInSeconds: result.codeExpiresInSeconds,
+            devCode: result.devCode,
+            redirectTo: "/dashboard",
+          },
+        });
+        return;
+      }
+      const { mustChangePassword, user } = result;
       if (user.role === "admin") {
         logout();
         window.location.href = "/admin/login";

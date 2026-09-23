@@ -11,6 +11,8 @@ export interface VerifyCodeCardProps {
   backLink?: React.ReactNode;
   /** Called with the entered code. Return true to show the success screen. */
   onVerify: (code: string) => Promise<boolean>;
+  /** Called when the person asks for a new code. Should request a fresh one from the backend. */
+  onResend?: () => Promise<void>;
   successTitle: string;
   successDescription: string;
   successAction?: React.ReactNode;
@@ -26,6 +28,7 @@ export function VerifyCodeCard({
   verifyLabel = "Verify & Sign In",
   backLink,
   onVerify,
+  onResend,
   successTitle,
   successDescription,
   successAction,
@@ -63,14 +66,20 @@ export function VerifyCodeCard({
     }
   };
 
-  const handleResend = () => {
+  const handleResend = async () => {
     setResending(true);
-    setTimeout(() => {
-      setResending(false);
+    setError("");
+    try {
+      if (onResend) {
+        await onResend();
+      }
       setSeconds(COUNTDOWN_SECONDS);
       setCode("");
-      setError("");
-    }, 900);
+    } catch {
+      setError("Could not send a new code. Please try again.");
+    } finally {
+      setResending(false);
+    }
   };
 
   if (success) {
