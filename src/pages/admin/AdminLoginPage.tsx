@@ -37,11 +37,7 @@ const AdminLoginPage = () => {
       }
       navigate("/admin", { replace: true });
     } catch (err: unknown) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Login failed. Try admin@exploits.ac.zw / admin123",
-      );
+      setError(err instanceof Error ? err.message : "Login failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -132,12 +128,6 @@ const AdminLoginPage = () => {
                 {loading ? "Signing in…" : "Sign In to Admin"}
               </button>
             </form>
-
-            <div className="mt-5 rounded-md bg-brand-primary/5 px-3 py-2 text-xs text-gray-600">
-              Demo credentials —{" "}
-              <span className="font-mono text-brand-primary">admin@exploits.ac.zw</span>{" "}
-              / <span className="font-mono text-brand-primary">admin123</span>
-            </div>
           </div>
 
           <p className="mt-6 text-center text-sm text-white/60">

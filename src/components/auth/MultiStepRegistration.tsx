@@ -9,9 +9,7 @@ import {
   EyeOff,
   GraduationCap,
   Lock,
-  Mail,
   Phone,
-  Presentation,
   ShieldCheck,
   User as UserIcon,
   UserRound,
@@ -21,12 +19,10 @@ import { useAuth } from "../../context/AuthContext";
 import { getDepartmentsApi, type Department } from "../../api/userApi";
 import { getProgrammesForDepartment, parseStudentId, CAMPUSES } from "../../data";
 import { Select } from "../shared/Select";
-import { OtpInput } from "./OtpInput";
-import { DEMO_CODE } from "../../lib/demoCode";
 import { alumniGraduationYears, expectedGraduationYears } from "../../lib/gradYears";
 
 type Role = "student" | "alumni";
-type Step = 1 | 2 | 3 | 4;
+type Step = 1 | 2 | 3;
 
 interface FormState {
   role: Role;
@@ -60,7 +56,6 @@ const STEP_LABELS: { step: Step; label: string; icon: React.ReactNode }[] = [
   { step: 1, label: "Personal", icon: <UserIcon className="h-4 w-4" /> },
   { step: 2, label: "Academic", icon: <GraduationCap className="h-4 w-4" /> },
   { step: 3, label: "Security", icon: <ShieldCheck className="h-4 w-4" /> },
-  { step: 4, label: "Verify", icon: <BadgeCheck className="h-4 w-4" /> },
 ];
 
 function getYearOptions(role: Role) {
@@ -79,7 +74,6 @@ export default function MultiStepRegistration() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [finalizing, setFinalizing] = useState(false);
-  const [verificationCode, setVerificationCode] = useState("");
 
   useEffect(() => {
     getDepartmentsApi()
@@ -156,9 +150,10 @@ export default function MultiStepRegistration() {
 
   const handleFinish = async () => {
     setError("");
-    if (step !== 4) return;
-    if (verificationCode !== DEMO_CODE) {
-      setError("That code doesn't match the one we sent. Please try again.");
+    if (step !== 3) return;
+    const err = validateStep(3);
+    if (err) {
+      setError(err);
       return;
     }
     setFinalizing(true);
@@ -186,8 +181,6 @@ export default function MultiStepRegistration() {
       setFinalizing(false);
     }
   };
-
-  const demoCode = DEMO_CODE;
 
   return (
     <div className="space-y-5">
@@ -451,40 +444,6 @@ export default function MultiStepRegistration() {
             )}
           </div>
           <div className="flex items-start gap-2 rounded-lg bg-brand-primary/5 px-3 py-2.5 text-xs text-brand-primary">
-            <Presentation className="mt-0.5 h-4 w-4 shrink-0" />
-            <span>We never store plain-text passwords. This demo runs entirely in your browser.</span>
-          </div>
-        </div>
-      )}
-
-      {/* ============ STEP 4: Verify ============ */}
-      {step === 4 && (
-        <div className="space-y-4">
-          <div className="flex items-start gap-3">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-primary/10 text-brand-primary">
-              <Mail className="h-6 w-6" />
-            </div>
-            <div>
-              <h3 className="text-sm font-semibold text-foreground">Verification code</h3>
-              <p className="mt-0.5 text-sm text-muted-foreground">
-                We sent a 6-digit code to{" "}
-                <span className="font-medium text-foreground">{form.email || "your email"}</span>.
-                Enter it below to complete your {form.role} registration.
-              </p>
-            </div>
-          </div>
-
-          <OtpInput
-            length={6}
-            value={verificationCode}
-            onChange={setVerificationCode}
-          />
-
-          <div className="rounded-md bg-amber-50 px-3 py-2 text-center text-xs text-amber-800">
-            Demo: enter code <span className="font-mono font-semibold">{demoCode}</span>
-          </div>
-
-          <div className="flex items-start gap-2 rounded-lg bg-brand-primary/5 px-3 py-2.5 text-xs text-brand-primary">
             <Building2 className="mt-0.5 h-4 w-4 shrink-0" />
             <span>
               Summary: <strong>{form.name}</strong> · {form.program || form.role} ·{" "}
@@ -496,7 +455,7 @@ export default function MultiStepRegistration() {
             <Zap className="mt-0.5 h-4 w-4 shrink-0" />
             <span>
               Your {form.role} account activates instantly — you'll be signed in
-              as soon as you finish. No administrator approval needed.
+              as soon as you finish.
             </span>
           </div>
         </div>
@@ -517,7 +476,7 @@ export default function MultiStepRegistration() {
           <ArrowLeft className="h-4 w-4" /> Back
         </button>
 
-        {step < 4 ? (
+        {step < 3 ? (
           <button
             type="button"
             onClick={goNext}
