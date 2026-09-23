@@ -9,6 +9,7 @@ import {
   EyeOff,
   GraduationCap,
   Lock,
+  Mail,
   Phone,
   ShieldCheck,
   User as UserIcon,
