@@ -46,6 +46,8 @@ import ManageDepartments from "./pages/admin/ManageDepartments";
 import NotificationsPage from "./pages/NotificationsPage";
 import AdminLoginPage from "./pages/admin/AdminLoginPage";
 import AdminAnalyticsPage from "./pages/admin/AdminAnalyticsPage";
+import AdminQuickActionsPage from "./pages/admin/AdminQuickActionsPage";
+import AdminCareerMilestonesPage from "./pages/admin/AdminCareerMilestonesPage";
 import AdminAcademicsPage from "./pages/admin/AdminAcademicsPage";
 import VerifyEmailPage from "./pages/VerifyEmailPage";
 import TwoFactorPage from "./pages/TwoFactorPage";
@@ -370,6 +372,22 @@ const AppRoutes = () => (
       element={
         <AdminRoute>
           <AdminAnalyticsPage />
+        </AdminRoute>
+      }
+    />
+    <Route
+      path="/admin/quick-actions"
+      element={
+        <AdminRoute>
+          <AdminQuickActionsPage />
+        </AdminRoute>
+      }
+    />
+    <Route
+      path="/admin/career-milestones"
+      element={
+        <AdminRoute>
+          <AdminCareerMilestonesPage />
         </AdminRoute>
       }
     />
