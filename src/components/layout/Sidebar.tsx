@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { NavLink, Link } from "react-router-dom";
+import { BarChart3, BriefcaseBusiness, CheckCircle2 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { AC_SOCKET_EVENT } from "../../context/SocketContext";
 import { getAlumniConnectionsApi } from "../../api/connectionApi";
@@ -185,9 +186,12 @@ const alumniNav: NavItem[] = [
 
 const adminNav: NavItem[] = [
   { label: "Dashboard", path: "/admin", icon: <IconDashboard /> },
+  { label: "Full Analytics", path: "/admin/analytics", icon: <BarChart3 className="w-5 h-5 shrink-0" /> },
   { label: "Users", path: "/admin/users", icon: <IconUsers /> },
   { label: "Jobs", path: "/admin/jobs", icon: <IconJobs /> },
   { label: "Events", path: "/admin/events", icon: <IconEvents /> },
+  { label: "Quick Actions", path: "/admin/quick-actions", icon: <CheckCircle2 className="w-5 h-5 shrink-0" /> },
+  { label: "Career Milestones", path: "/admin/career-milestones", icon: <BriefcaseBusiness className="w-5 h-5 shrink-0" /> },
 ];
 
 // ── Extracted as a module-level component (NOT defined inside Sidebar) ────────
