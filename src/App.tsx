@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import {
   BrowserRouter,
   Routes,
@@ -9,46 +10,78 @@ import { AuthProvider } from "./context/AuthContext";
 import { useAuth } from "./context/useAuth";
 import { SocketProvider } from "./context/SocketContext";
 
-// Pages
-import BusinessesPage from "./pages/alumni/businessesPage";
-import BusinessDetailPage from "./pages/alumni/businessDetailPage";
-import ProductsPage from "./pages/alumni/productsPage";
-import ProductDetailsPage from "./pages/alumni/productDetailsPage";
-import StudentBusinessesPage from "./pages/student/businessesPage";
-import StudentBusinessDetailPage from "./pages/student/businessDetailPage";
-import StudentProductDetailPage from "./pages/student/productDetailsPage";
-
+// Landing + auth pages load eagerly (first paint)
 import Home from "./pages/Home";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
-import ForgotPasswordPage from "./pages/ForgotPasswordPage";
-import ResetPasswordPage from "./pages/ResetPasswordPage";
-import ChangePasswordPage from "./pages/ChangePasswordPage";
-import DashboardPage from "./pages/DashboardPage";
-import StudentDashboardPage from "./pages/student/StudentDashboardPage";
-import AlumniDashboardPage from "./pages/alumni/AlumniDashboardPage";
-import JobsPage from "./pages/JobsPage";
-import EventsPage from "./pages/EventsPage";
-import FeedPage from "./pages/FeedPage";
-import MessagingPage from "./pages/MessagingPage";
-import ProfilePage from "./pages/ProfilePage";
-import FindMentorPage from "./pages/FindMentorPage";
-import GroupsPage from "./pages/GroupsPage";
-import AlumniDirectoryPage from "./pages/student/AlumniDirectoryPage";
-import AlumniStudentsPage from "./pages/alumni/AlumniStudentsPage";
-// Admin pages
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import ManageUsers from "./pages/admin/ManageUsers";
-import AdminAlumniRosterPage from "./pages/admin/AdminAlumniRosterPage";
-import ManageJobs from "./pages/admin/ManageJobs";
-import ManageEvents from "./pages/admin/ManageEvents";
-import ManageDepartments from "./pages/admin/ManageDepartments";
-import NotificationsPage from "./pages/NotificationsPage";
-import AdminLoginPage from "./pages/admin/AdminLoginPage";
-import AdminAnalyticsPage from "./pages/admin/AdminAnalyticsPage";
-import AdminAcademicsPage from "./pages/admin/AdminAcademicsPage";
-import VerifyEmailPage from "./pages/VerifyEmailPage";
-import TwoFactorPage from "./pages/TwoFactorPage";
+
+// Everything else is code-split per route
+const ForgotPasswordPage = lazy(() => import("./pages/ForgotPasswordPage"));
+const ResetPasswordPage = lazy(() => import("./pages/ResetPasswordPage"));
+const ChangePasswordPage = lazy(() => import("./pages/ChangePasswordPage"));
+const DashboardPage = lazy(() => import("./pages/DashboardPage"));
+const JobsPage = lazy(() => import("./pages/JobsPage"));
+const EventsPage = lazy(() => import("./pages/EventsPage"));
+const FeedPage = lazy(() => import("./pages/FeedPage"));
+const MessagingPage = lazy(() => import("./pages/MessagingPage"));
+const ProfilePage = lazy(() => import("./pages/ProfilePage"));
+const FindMentorPage = lazy(() => import("./pages/FindMentorPage"));
+const GroupsPage = lazy(() => import("./pages/GroupsPage"));
+const NotificationsPage = lazy(() => import("./pages/NotificationsPage"));
+const VerifyEmailPage = lazy(() => import("./pages/VerifyEmailPage"));
+const TwoFactorPage = lazy(() => import("./pages/TwoFactorPage"));
+
+// Student
+const StudentDashboardPage = lazy(
+  () => import("./pages/student/StudentDashboardPage"),
+);
+const StudentBusinessesPage = lazy(
+  () => import("./pages/student/businessesPage"),
+);
+const StudentBusinessDetailPage = lazy(
+  () => import("./pages/student/businessDetailPage"),
+);
+const StudentProductDetailPage = lazy(
+  () => import("./pages/student/productDetailsPage"),
+);
+const AlumniDirectoryPage = lazy(
+  () => import("./pages/student/AlumniDirectoryPage"),
+);
+
+// Alumni
+const AlumniDashboardPage = lazy(
+  () => import("./pages/alumni/AlumniDashboardPage"),
+);
+const AlumniStudentsPage = lazy(
+  () => import("./pages/alumni/AlumniStudentsPage"),
+);
+const BusinessesPage = lazy(() => import("./pages/alumni/businessesPage"));
+const BusinessDetailPage = lazy(
+  () => import("./pages/alumni/businessDetailPage"),
+);
+const ProductsPage = lazy(() => import("./pages/alumni/productsPage"));
+const ProductDetailsPage = lazy(
+  () => import("./pages/alumni/productDetailsPage"),
+);
+
+// Admin
+const AdminLoginPage = lazy(() => import("./pages/admin/AdminLoginPage"));
+const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
+const ManageUsers = lazy(() => import("./pages/admin/ManageUsers"));
+const AdminAlumniRosterPage = lazy(
+  () => import("./pages/admin/AdminAlumniRosterPage"),
+);
+const ManageJobs = lazy(() => import("./pages/admin/ManageJobs"));
+const ManageEvents = lazy(() => import("./pages/admin/ManageEvents"));
+const ManageDepartments = lazy(
+  () => import("./pages/admin/ManageDepartments"),
+);
+const AdminAnalyticsPage = lazy(
+  () => import("./pages/admin/AdminAnalyticsPage"),
+);
+const AdminAcademicsPage = lazy(
+  () => import("./pages/admin/AdminAcademicsPage"),
+);
 
 // ── Guards ──────────────────────────────────────────────────────────────────
 
@@ -419,11 +452,19 @@ const AppRoutes = () => (
   </Routes>
 );
 
+const RouteFallback = () => (
+  <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="w-8 h-8 border-4 border-[#1e3a6e] border-t-transparent rounded-full animate-spin" />
+  </div>
+);
+
 const App = () => (
   <BrowserRouter>
     <AuthProvider>
       <SocketProvider>
-        <AppRoutes />
+        <Suspense fallback={<RouteFallback />}>
+          <AppRoutes />
+        </Suspense>
       </SocketProvider>
     </AuthProvider>
   </BrowserRouter>
