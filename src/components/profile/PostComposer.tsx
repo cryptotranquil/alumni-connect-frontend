@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ImagePlus, Loader2, Send } from "lucide-react";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
 import { createPostApi } from "../../api/postApi";
 import type { PostCategory } from "../../types";
 import { POST_CATEGORIES } from "../../data";

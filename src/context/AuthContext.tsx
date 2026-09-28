@@ -1,70 +1,15 @@
-import {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  type ReactNode,
-} from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import { api, getErrorMessage } from "../api/client";
 import {
   loginRawApi,
   verifyTwoFactorApi,
   resendTwoFactorApi,
-  type TwoFactorChallenge,
 } from "../api/authApi";
+import { AuthContext, type User } from "./AuthContextValue";
 
-export type UserRole = "student" | "alumni" | "admin";
-
-export interface User {
-  _id: string;
-  name: string;
-  email: string;
-  role: UserRole;
-  phone?: string;
-  graduationYear?: string;
-  university?: string;
-  department?: string;
-  program?: string;
-  registrationNumber?: string;
-  company?: string;
-  position?: string;
-  profilePhoto?: string;
-  skills?: string[];
-  bio?: string;
-  cvUrl?: string;
-  isApproved?: boolean;
-  mustChangePassword?: boolean;
-  token?: string;
-}
+export type { AuthContextType, User, UserRole } from "./AuthContextValue";
 
 const STORAGE_KEY = "alumniConnectUser";
-
-interface AuthContextType {
-  user: User | null;
-  loading: boolean;
-  login: (
-    email: string,
-    password: string,
-  ) => Promise<
-    | { twoFactorRequired: false; mustChangePassword: boolean; user: User }
-    | TwoFactorChallenge
-  >;
-  completeLogin: (
-    twoFactorToken: string,
-    code: string,
-  ) => Promise<{ mustChangePassword: boolean; user: User }>;
-  resendLoginCode: (twoFactorToken: string) => Promise<{ codeExpiresInSeconds: number; devCode?: string }>;
-  registerStudent: (data: Record<string, string>) => Promise<void>;
-  registerFirstAdmin: (data: Record<string, string>) => Promise<void>;
-  registerAlumni: (
-    data: Record<string, string>,
-  ) => Promise<{ pendingApproval: boolean }>;
-  updateStoredUser: (u: User) => void;
-  logout: () => void;
-  isAuthenticated: boolean;
-}
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -236,10 +181,4 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-export const useAuth = () => {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
-  return ctx;
-};
-
-export default AuthContext;
+export default AuthProvider;

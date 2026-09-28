@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import PageContainer from "../../components/layout/PageContainer";
 import {
   getAllDepartmentsApi,
@@ -21,15 +21,11 @@ const ManageDepartments = () => {
   });
   const { toast } = useToast();
 
-  useEffect(() => {
-    fetchDepartments();
-  }, []);
-
-  const fetchDepartments = async () => {
+  const fetchDepartments = useCallback(async () => {
     try {
       const data = await getAllDepartmentsApi();
       setDepartments(data);
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "Failed to load departments",
@@ -38,7 +34,11 @@ const ManageDepartments = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    void fetchDepartments();
+  }, [fetchDepartments]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

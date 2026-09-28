@@ -37,7 +37,7 @@ export function ExperienceSection({ userId, isOwn, onActivityChanged }: Experien
 
   useEffect(() => {
     void reload();
-  }, [userId]);
+  }, [reload]);
 
   const openAdd = () => {
     setEditing({

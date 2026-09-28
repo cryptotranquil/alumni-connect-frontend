@@ -5,7 +5,7 @@ import type { User } from "../../types";
 import { updateProfileApi } from "../../api/userApi";
 import { graduationYearOptions } from "../../lib/gradYears";
 import { Select } from "../shared/Select";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
 
 const inputCls =
   "h-10 w-full rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus:border-brand-primary/50 focus:ring-1 focus:ring-brand-primary/30";

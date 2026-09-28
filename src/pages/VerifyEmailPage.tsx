@@ -1,7 +1,7 @@
 import { Link, useSearchParams } from "react-router-dom";
 import { VerifyCodeCard } from "../components/auth/VerifyCodeCard";
 import { resendEmailCodeApi, verifyEmailApi } from "../api/authApi";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 import LogoHeader from "../components/layout/LogoHeader";
 import Background from "../components/layout/Background";
 

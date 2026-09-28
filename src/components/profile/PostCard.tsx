@@ -20,7 +20,7 @@ import {
   editPostApi,
   deletePostApi,
 } from "../../api/postApi";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
 import { timeAgo } from "../../lib/timeAgo";
 import { Badge, InitialsAvatar } from "../shared";
 

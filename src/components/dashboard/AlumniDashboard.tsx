@@ -13,7 +13,7 @@ import {
   UserPlus,
 } from "lucide-react";
 import PageContainer from "../layout/PageContainer";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
 import { getJobsApi } from "../../api/jobApi";
 import { getEventsApi } from "../../api/eventApi";
 import { getProfileApi } from "../../api/userApi";

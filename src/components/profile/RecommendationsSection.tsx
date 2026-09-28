@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Award, Loader2, MessageSquarePlus, X } from "lucide-react";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
 import {
   addRecommendationApi,
   getRecommendationsApi,

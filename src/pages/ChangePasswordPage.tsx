@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Navigate } from "react-router-dom";
 import PageContainer from "../components/layout/PageContainer";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 import { changePasswordApi } from "../api/userApi";
 
 const ChangePasswordPage = () => {

@@ -12,22 +12,26 @@ const ManageJobs = () => {
   const [error, setError] = useState("");
 
   const fetchJobs = () => {
-    setLoading(true);
     getJobsApi()
       .then((result) => setJobs(Array.isArray(result) ? result : []))
       .catch(console.error)
       .finally(() => setLoading(false));
   };
 
-  useEffect(() => {
+  const reloadJobs = () => {
+    setLoading(true);
     fetchJobs();
+  };
+
+  useEffect(() => {
+    void fetchJobs();
   }, []);
 
   const handleApprove = async (id: string) => {
     try {
       await approveJobApi(id);
       setSuccess("Job approved and published.");
-      fetchJobs();
+      reloadJobs();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to approve");
     }
@@ -38,7 +42,7 @@ const ManageJobs = () => {
     try {
       await deleteJobApi(id);
       setSuccess("Job deleted.");
-      fetchJobs();
+      reloadJobs();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to delete");
     }

@@ -8,8 +8,8 @@ import {
 } from "../api/messageApi";
 import { getPeerUserApi } from "../api/userApi";
 import type { Conversation, Message } from "../types";
-import { useAuth } from "../context/AuthContext";
-import { useSocket } from "../context/SocketContext";
+import { useAuth } from "../context/useAuth";
+import { useSocket } from "../context/useSocket";
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
 
@@ -287,6 +287,8 @@ const MessagingPage = () => {
 
   const bottomRef = useRef<HTMLDivElement>(null);
 
+  const selectedUserId = selected?.user._id;
+
   // ── Performance: stable refreshConversations via useCallback ──────────────
   const refreshConversations = useCallback(() => {
     getConversationsApi().then(setConversations).catch(console.error);
@@ -350,11 +352,10 @@ const MessagingPage = () => {
 
   // ── Real-time via Socket.IO ───────────────────────────────────────────────
   useEffect(() => {
-    if (!socket) return;
+    if (!socket || !selectedUserId) return;
     const onNew = (msg: Message) => {
       refreshConversations();
-      if (!selected) return;
-      const partner = selected.user._id;
+      const partner = selectedUserId;
       const involves =
         (msg.senderId === partner && msg.receiverId === user?._id) ||
         (msg.receiverId === partner && msg.senderId === user?._id);
@@ -367,7 +368,7 @@ const MessagingPage = () => {
     return () => {
       socket.off("message:new", onNew);
     };
-  }, [socket, selected?.user._id, user?._id, refreshConversations]);
+  }, [socket, selectedUserId, user?._id, refreshConversations]);
 
   // ── Send message ──────────────────────────────────────────────────────────
   const handleSend = async () => {

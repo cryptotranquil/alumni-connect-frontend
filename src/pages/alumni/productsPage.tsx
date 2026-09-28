@@ -1,22 +1,15 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import PageContainer from "../../components/layout/PageContainer";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
 
-import { createBusinessApi, getMyBusinessesApi } from "@/api/businessApi";
 import { createProductApi, getMyProductsApi } from "@/api/productsApi";
+import { getErrorMessage } from "@/api/client";
 // import type { Business } from "../../types";
 import type { Product } from "@/types/product";
 import {
-  Heart,
-  Search,
   Eye,
-  SlidersHorizontal,
-  Star,
-  MessageCircle,
-  ChevronLeft,
-  ChevronRight,
 } from "lucide-react";
 export interface ProductFormData {
   name: string;
@@ -139,13 +132,6 @@ export function ProductDetailModal({
   onEdit?: (product: Product) => void;
 }) {
   
-  const typeBadgeColor = (type?: string) => {
-    if (type === "Technology") return "bg-orange-100 text-orange-700";
-    if (type === "Education") return "bg-green-100 text-green-700";
-    // if (type === "part-time") return "bg-purple-100 text-purple-700";
-    return "bg-blue-100 text-[#1e3a6e]";
-  };
-
   const canEdit = userRole === "alumni" || (userRole === "alumni");
 
   // const handleApply = async () => {
@@ -154,7 +140,7 @@ export function ProductDetailModal({
   //   try {
   //     await onApply(job._id);
   //     onClose();
-  //   } catch (err: any) {
+  //   } catch (err) {
   //     setApplyError(err.message || "Failed to apply for this job");
   //   } finally {
   //     setApplying(false);
@@ -353,7 +339,6 @@ export function PostProductModal({
   onClose,
   onSubmit,
   submitting,
-  error,
   isAdmin = false,
   editProduct = null,
 }: PostProductModalProps) {
@@ -370,24 +355,6 @@ export function PostProductModal({
 
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
-
-  // Update form when editJob changes
-  useEffect(() => {
-    if (editProduct) {
-      setForm({
-        name: editProduct?.name || "",
-        price: editProduct?.price || 0,
-        category: editProduct?.category || "",
-        quantity: editProduct?.quantity || 1,
-        description: editProduct?.description || "",
-        businessId: editProduct?.businessId || "",
-        inStock: editProduct?.inStock || true,
-      });
-      // Reset validation state when editing different job
-      setFieldErrors({});
-      setTouched({});
-    }
-  }, [editProduct]);
 
   const set =
     (key: keyof ProductFormData) =>
@@ -725,7 +692,6 @@ const ProductsPage = () => {
   const [myProducts, setMyProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [showProductModal, setShowProductModal] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [search, setSearch] = useState("");
@@ -739,42 +705,11 @@ const ProductsPage = () => {
     user?.role === "alumni" ||
     // user?.role === "student" ||
     user?.role === "admin";
-  const fetchMyBusinesses = async () => {
+  const fetchBusinesses = useCallback(async () => {
     setLoading(true);
     setFetchError("");
     try {
-      if (!user?._id){
-        return;
-      }
-      const data = await getMyProductsApi();
-    //   const data2 = await getMyProductsApi();
-    //   console.log(data2);
-      // console.log(user._id);
-      const visible =
-        user?.role === "admin"
-          ? data
-          : data.filter((j) => j.status === "approved");
-      setMyProducts(visible);
-      console.log(data);
-    } catch (err: any) {
-      console.error("Failed to fetch Businesses:", err);
-      setFetchError(
-        err.message || "Failed to load Businesses. Please try again later.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchMyBusinesses();
-  }, [user]);
-
-  const fetchBusinesses = async () => {
-    setLoading(true);
-    setFetchError("");
-    try {
-      if (!user?._id){
+      if (!user?._id) {
         return;
       }
       const data = await getMyProductsApi();
@@ -783,19 +718,19 @@ const ProductsPage = () => {
           ? data
           : data.filter((j) => j.status === "approved");
       setMyProducts(visible);
-    } catch (err: any) {
+    } catch (err) {
       console.error("Failed to fetch businesses:", err);
       setFetchError(
-        err.message || "Failed to load businesses. Please try again later.",
+        getErrorMessage(err, "Failed to load businesses. Please try again later."),
       );
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?._id, user?.role]);
 
   useEffect(() => {
-    fetchBusinesses();
-  }, [user]);
+    void fetchBusinesses();
+  }, [fetchBusinesses]);
 
   const handleSubmit = async (form: ProductFormData) => {
     // Validate form first
@@ -837,20 +772,17 @@ const ProductsPage = () => {
       }
       setShowProductModal(false);
       await fetchBusinesses(); // Refresh the job list
-    } catch (err: any) {
+    } catch (err) {
       console.error("Job operation failed:", err);
       setPostError(
-        err.message ||
+        getErrorMessage(
+          err,
           "Failed to save job. Please check your connection and try again.",
+        )
       );
     } finally {
       setSubmitting(false);
     }
-  };
-
-  const handleEditBusiness = (product: Product) => {
-    setEditingProduct(product);
-    setShowProductModal(true);
   };
 
   const filtered = myProducts.filter((j) => {
@@ -860,13 +792,6 @@ const ProductsPage = () => {
     const matchType = filterType ? j.category === filterType : true;
     return matchSearch && matchType;
   });
-
-  const categoryBadgeColor = (category?: string) => {
-    if (category === "Electronics") return "bg-orange-100 text-orange-700";
-    if (category === "Part time Classes") return "bg-green-100 text-green-700";
-    // if (category === "part-time") return "bg-purple-100 text-purple-700";
-    return "bg-blue-100 text-[#1e3a6e]";
-  };
 
   return (
     <PageContainer title="My Products">
@@ -1220,6 +1145,7 @@ const ProductsPage = () => {
       {/* Post/Edit Job Modal */}
       {showProductModal && (
         <PostProductModal
+          key={editingProduct?._id ?? "new-product"}
           onClose={() => {
             setShowProductModal(false);
             setPostError("");

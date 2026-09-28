@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import PageContainer from "../../components/layout/PageContainer";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
 import { AC_SOCKET_EVENT } from "../../context/SocketContext";
 import {
   acceptConnectionApi,

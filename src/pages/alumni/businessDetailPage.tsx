@@ -1,6 +1,5 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
 import { getBusinessApi, updateBusinessApi } from "@/api/businessApi";
 import type { Business } from "../../types";
 import PageContainer from "../../components/layout/PageContainer";
@@ -17,7 +16,6 @@ export interface BusinessFormData {
 }
 
 const BusinessDetail = () => {
-  const { user } = useAuth();
   const [business, setBusiness] = useState<Business[]>([]);
 
   const [logoPreview, setLogoPreview] = useState("");
@@ -29,42 +27,30 @@ const BusinessDetail = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  const { business_id } = useParams(); 
-  const [businessData, setBusinessData] = useState<BusinessFormData>({
-    name: "",
-    location: "",
-    category: "",
-    description: "",
-    contact_email: "",
-    contact_phone: "",
-    logo: "",
-    banner: "",
-  });
+  const { business_id } = useParams();
 
-  // Temporary frontend data
-  // We will replace this with your API call later
-  const loadBusiness = async () => {
+  const loadBusiness = useCallback(async () => {
     setLoading(true);
     try {
-      
-      if (business_id){
+      if (business_id) {
         const data = await getBusinessApi(business_id);
         setBusiness(data);
       }
-    
     } catch (error) {
       console.error("Failed to load business:", error);
     } finally {
       setLoading(false);
     }
-  };
-  useEffect(() => {
-    loadBusiness();
-  }, []);
-// console.log(bannerFile?.name);
-  // console.log('business_detail',business[0].name);
+  }, [business_id]);
 
-  const handleChange = (e) => {
+  useEffect(() => {
+    void loadBusiness();
+  }, [loadBusiness]);
+
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
+  ) => {
 
     const { name, value } = e.target;
     console.log('fired', name, value, e.target.value);
@@ -76,7 +62,7 @@ const BusinessDetail = () => {
     });
   };
 
-  const handleLogoChange = (e) => {
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const logo = e.target.files?.[0];
 
     if (!logo) return;
@@ -85,7 +71,7 @@ const BusinessDetail = () => {
     setLogoPreview(URL.createObjectURL(logo));
   };
 
-  const handleBannerChange = (e) => {
+  const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const banner = e.target.files?.[0];
     console.log(banner);
     if (!banner) return;

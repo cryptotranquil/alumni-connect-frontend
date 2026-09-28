@@ -14,7 +14,7 @@ import {
 import type { ProfileActivity, ProfileActivityType } from "../../types/profile";
 import { timeAgo } from "../../lib/timeAgo";
 import { InitialsAvatar } from "../shared";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
 
 const ICONS: Record<ProfileActivityType, React.ReactNode> = {
   post: <PenSquare className="h-4 w-4" />,

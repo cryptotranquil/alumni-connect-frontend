@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import PageContainer from "../components/layout/PageContainer";
@@ -25,62 +25,61 @@ const NotificationsPage = () => {
   const limit = 20;
 
   // Fetch notifications
-  const fetchNotifications = async (reset = true) => {
-    if (reset) {
-      setPage(0);
-      setNotifications([]);
-      setLoading(true);
-    } else {
-      setLoadingMore(true);
-    }
-
-    try {
-      const currentPage = reset ? 0 : page;
-      const response = await getNotificationsApi(limit, currentPage * limit);
-
+  const fetchNotifications = useCallback(
+    async (reset = true, targetPage = 0) => {
       if (reset) {
-        setNotifications(response.notifications);
+        setPage(0);
+        setNotifications([]);
+        setLoading(true);
       } else {
-        setNotifications((prev) => [...prev, ...response.notifications]);
+        setLoadingMore(true);
       }
 
-      setHasMore(response.pagination.hasMore);
-      if (!reset) {
-        setPage((prev) => prev + 1);
-      } else if (response.notifications.length === limit) {
-        setPage(1);
+      try {
+        const currentPage = reset ? 0 : targetPage;
+        const response = await getNotificationsApi(limit, currentPage * limit);
+
+        if (reset) {
+          setNotifications(response.notifications);
+        } else {
+          setNotifications((prev) => [...prev, ...response.notifications]);
+        }
+
+        setHasMore(response.pagination.hasMore);
+        if (!reset) {
+          setPage((prev) => prev + 1);
+        } else if (response.notifications.length === limit) {
+          setPage(1);
+        }
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to load notifications",
+        );
+      } finally {
+        setLoading(false);
+        setLoadingMore(false);
       }
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to load notifications",
-      );
-    } finally {
-      setLoading(false);
-      setLoadingMore(false);
-    }
-  };
+    },
+    [limit],
+  );
 
   useEffect(() => {
-    fetchNotifications(true);
-  }, []);
+    void fetchNotifications(true);
+  }, [fetchNotifications]);
 
   // Listen for real-time notifications
   useEffect(() => {
-    const handleNewNotification = (_event: CustomEvent) => {
-      //   const data = event.detail;
-      // Refresh notifications when new one arrives
-      fetchNotifications(true);
+    const handleNewNotification = () => {
+      // Refresh notifications when a new one arrives
+      void fetchNotifications(true);
     };
 
-    window.addEventListener("notification:new" as any, handleNewNotification);
+    window.addEventListener("notification:new", handleNewNotification);
 
     return () => {
-      window.removeEventListener(
-        "notification:new" as any,
-        handleNewNotification,
-      );
+      window.removeEventListener("notification:new", handleNewNotification);
     };
-  }, []);
+  }, [fetchNotifications]);
 
   const handleMarkAsRead = async (notificationId: string) => {
     try {
@@ -587,7 +586,7 @@ const NotificationsPage = () => {
           {hasMore && (
             <div className="text-center pt-4">
               <button
-                onClick={() => fetchNotifications(false)}
+                onClick={() => void fetchNotifications(false, page)}
                 disabled={loadingMore}
                 className="px-6 py-2 text-sm font-medium text-[#1e3a6e] bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
               >

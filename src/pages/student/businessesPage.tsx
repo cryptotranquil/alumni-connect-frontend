@@ -1,21 +1,12 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import PageContainer from "../../components/layout/PageContainer";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
 
-import { getAllBusinessesApi, getBusinessApi } from "@/api/businessApi";
+import { getAllBusinessesApi } from "@/api/businessApi";
+import { getErrorMessage } from "@/api/client";
 import type { Business } from "../../types";
-import {
-  Heart,
-  Search,
-  Eye,
-  SlidersHorizontal,
-  Star,
-  MessageCircle,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
 
 
 // ─── Main Page (Updated with comprehensive error handling) ─────────────────────────────────────────────────
@@ -25,61 +16,46 @@ const ProductsPage = () => {
 
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedProduct, setSelectedProduct] = useState<Business | null>(null);
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState("");
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [fetchError, setFetchError] = useState("");
 
- 
-  const fetchBusinesses = async () => {
+   const fetchBusinesses = useCallback(async () => {
     setLoading(true);
     setFetchError("");
     try {
-      if (!user?._id){
+      if (!user?._id) {
         return;
       }
       const data = await getAllBusinessesApi();
-    //   const data2 = await getMyProductsApi();
-    //   console.log(data2);
-      // console.log(user._id);
       const visible =
         user?.role === "admin"
           ? data
           : data.filter((j) => j.status === "approved");
       setBusinesses(visible);
-      console.log(data);
-    } catch (err: any) {
+    } catch (err) {
       console.error("Failed to fetch Businesses:", err);
       setFetchError(
-        err.message || "Failed to load Businesses. Please try again later.",
+        getErrorMessage(err, "Failed to load Businesses. Please try again later."),
       );
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?._id, user?.role]);
 
-  useEffect(() => {
-    fetchBusinesses();
-  }, []);
+   useEffect(() => {
+    void fetchBusinesses();
+  }, [fetchBusinesses]);
 
- 
+  
 
-  const filtered = businesses.filter((j) => {
+   const filtered = businesses.filter((j) => {
     const matchSearch =
       j.name.toLowerCase().includes(search.toLowerCase()) ||
       j.category.toLowerCase().includes(search.toLowerCase());
     const matchType = filterType ? j.category === filterType : true;
     return matchSearch && matchType;
   });
-
-  const categoryBadgeColor = (category?: string) => {
-    if (category === "Electronics") return "bg-orange-100 text-orange-700";
-    if (category === "Part time Classes") return "bg-green-100 text-green-700";
-    // if (category === "part-time") return "bg-purple-100 text-purple-700";
-    return "bg-blue-100 text-[#1e3a6e]";
-  };
 
   return (
     <PageContainer title="Store">

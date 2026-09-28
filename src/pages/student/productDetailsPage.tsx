@@ -1,50 +1,45 @@
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
-import { getProductApi, updateProductApi } from "@/api/productsApi";
+import { getProductApi } from "@/api/productsApi";
+import { getBusinessApi } from "@/api/businessApi";
+import type { Business } from "@/types/business";
 import type { Product } from "@/types/product";
 import PageContainer from "@/components/layout/PageContainer";
 
 import {
-  ArrowLeft,
-  Heart,
   MessageCircle,
-  Share2,
   Star,
-  ChevronLeft,
-  ChevronRight,
 } from "lucide-react";
 
 
 export default function ProductDetails() {
-  const [activeImage, setActiveImage] = useState(0);
-  const [selectedColor, setSelectedColor] = useState("Black");
-  const [selectedSize, setSelectedSize] = useState("M");
-  const [liked, setLiked] = useState(false);
-
   const [product, setProduct] = useState<Product[]>([]);
-const [loading, setLoading] = useState(true);
+  const [business, setBusiness] = useState<Business | null>(null);
 
 const { product_id } = useParams();
 const navigate  = useNavigate();
-const loadProduct = async () => {
-    setLoading(true);
-    try{
-        if (product_id){
-            const product_data = await getProductApi(product_id);
-            console.log('fetched', product_data);
-            setProduct(product_data);
-        }
-    } catch (error) {
-        console.error("Failed to load product", error);
-    } finally{
-        setLoading(false);
+const loadProduct = useCallback(() => {
+    if (!product_id) {
+        return;
     }
-}
+    void getProductApi(product_id)
+        .then(async (product_data) => {
+            setProduct(product_data);
+            if (product_data[0]?.businessId) {
+                const business_data = await getBusinessApi(
+                    product_data[0].businessId,
+                ).catch(() => []);
+                setBusiness(business_data[0] ?? null);
+            }
+        })
+        .catch((error: unknown) => {
+            console.error("Failed to load product", error);
+        });
+}, [product_id]);
 
 useEffect(() => {
-    loadProduct();
-}, []);
+    void loadProduct();
+}, [loadProduct]);
 // console.log(product[0]?.businessId.name);
   const formatPrice = (price: number) =>
     `MWK ${price.toLocaleString()}`;
@@ -71,8 +66,10 @@ useEffect(() => {
 
     Please let me know if it is available.`;
 
+    if (!business?.contact_phone) return;
+
     window.open(
-      `https://wa.me/${"+265" + product[0]?.businessId.contact_phone}?text=${encodeURIComponent(
+      `https://wa.me/${"+265" + business.contact_phone}?text=${encodeURIComponent(
         message
       )}`,
       "_blank"
@@ -426,7 +423,7 @@ useEffect(() => {
 
                 <div>
                     <h3 className="font-semibold text-gray-900">
-                    {product[0]?.businessId.name}
+                    {business?.name}
                     </h3>
 
                     <div className="mt-1 flex items-center gap-1 text-sm text-gray-500">
@@ -448,7 +445,7 @@ useEffect(() => {
                 </p>
 
                 <button 
-                    onClick={() => navigate(`/student/business_details/${product[0].businessId._id}`)}
+                    onClick={() => navigate(`/student/business_details/${business?._id ?? product[0]?.businessId}`)}
                     className="mt-5 w-full rounded-lg border border-gray-900 py-3 text-sm font-semibold hover:bg-gray-900 hover:text-white">
                 Visit Store
                 </button>

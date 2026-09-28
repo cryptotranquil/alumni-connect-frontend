@@ -15,8 +15,8 @@ interface ProfilePhotoModalProps {
 }
 
 /**
- * Mock photo uploader with live preview + simple focus-crop preview.
- * Saves via changeProfilePhotoApi (object URL in mock mode).
+ * Photo uploader with live preview.
+ * Saves via changeProfilePhotoApi.
  */
 export function ProfilePhotoModal({
   mode,
@@ -141,7 +141,7 @@ export function ProfilePhotoModal({
 
           {error && <p className="text-center text-xs text-red-600">{error}</p>}
           <p className="text-center text-[11px] text-gray-400">
-            JPG, PNG or WebP · max 3 MB · preview only (mock storage)
+            JPG, PNG or WebP · max 3 MB
           </p>
 
           <div className="flex justify-end gap-3 border-t border-gray-100 pt-4">

@@ -10,7 +10,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import PageContainer from "../components/layout/PageContainer";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 import {
   getMenteeMatchesApi,
   getMentorMatchesApi,

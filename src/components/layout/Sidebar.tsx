@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { NavLink, Link } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
 import { AC_SOCKET_EVENT } from "../../context/SocketContext";
 import { getAlumniConnectionsApi } from "../../api/connectionApi";
 

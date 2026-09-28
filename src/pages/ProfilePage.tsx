@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ShieldCheck, Mail, Phone, User } from "lucide-react";
 import PageContainer from "../components/layout/PageContainer";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 import type {
   ConnectionStatus,
   ProfileActivity,

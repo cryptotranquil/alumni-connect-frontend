@@ -33,7 +33,7 @@ export interface Notification {
     eventDate?: string;
     status?: string;
     responseMessage?: string;
-    [key: string]: any;
+    [key: string]: unknown;
   };
   read: boolean;
   readAt?: string;

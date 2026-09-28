@@ -8,7 +8,8 @@ import {
   deleteNotificationApi,
 } from "../../api/notificationApi";
 import type { Notification } from "../../types";
-// import { useSocket } from "../../context/SocketContext";
+import type { NotificationEventDetail } from "../../types/notificationEvents";
+// import { useSocket } from "../../context/useSocket";
 import { formatDistanceToNow } from "date-fns";
 
 const NotificationBell = () => {
@@ -26,7 +27,7 @@ const NotificationBell = () => {
 
   // Listen for real-time notifications via custom events (since socket emits custom events)
   useEffect(() => {
-    const handleNewNotification = (event: CustomEvent) => {
+    const handleNewNotification = (event: CustomEvent<NotificationEventDetail>) => {
       const data = event.detail;
       setUnreadCount((prev) => prev + 1);
       if (isOpen) {
@@ -35,7 +36,7 @@ const NotificationBell = () => {
       }
     };
 
-    const handleNotificationRead = (event: CustomEvent) => {
+    const handleNotificationRead = (event: CustomEvent<NotificationEventDetail>) => {
       const data = event.detail;
       console.log(data);
       if (isOpen) {
@@ -43,18 +44,12 @@ const NotificationBell = () => {
       }
     };
 
-    window.addEventListener("notification:new" as any, handleNewNotification);
-    window.addEventListener("notification:read" as any, handleNotificationRead);
+    window.addEventListener("notification:new", handleNewNotification);
+    window.addEventListener("notification:read", handleNotificationRead);
 
     return () => {
-      window.removeEventListener(
-        "notification:new" as any,
-        handleNewNotification,
-      );
-      window.removeEventListener(
-        "notification:read" as any,
-        handleNotificationRead,
-      );
+      window.removeEventListener("notification:new", handleNewNotification);
+      window.removeEventListener("notification:read", handleNotificationRead);
     };
   }, [isOpen]);
 

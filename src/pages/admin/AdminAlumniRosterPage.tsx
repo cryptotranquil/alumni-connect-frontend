@@ -89,7 +89,11 @@ const AdminAlumniRosterPage = () => {
 
   const loadEntries = useCallback(
     async (reset: boolean) => {
-      reset ? setLoadingEntries(true) : setLoadingMore(true);
+      if (reset) {
+        setLoadingEntries(true);
+      } else {
+        setLoadingMore(true);
+      }
       try {
         const page = await listRosterApi({
           q: search || undefined,
@@ -110,7 +114,6 @@ const AdminAlumniRosterPage = () => {
         setLoadingMore(false);
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [search, statusFilter, nextCursor, toast],
   );
 

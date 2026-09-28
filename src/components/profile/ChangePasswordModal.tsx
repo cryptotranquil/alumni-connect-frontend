@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Eye, EyeOff, Lock, ShieldCheck, X } from "lucide-react";
 import { changePasswordApi } from "../../api/userApi";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
 
 const inputCls =
   "h-10 w-full rounded-lg border border-input bg-background pl-9 pr-10 text-sm outline-none transition-colors focus:border-brand-primary/50 focus:ring-1 focus:ring-brand-primary/30";

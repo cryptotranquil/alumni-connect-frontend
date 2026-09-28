@@ -32,7 +32,7 @@ export function ProfilePostsSection({
 
   useEffect(() => {
     void reload();
-  }, [userId]);
+  }, [reload]);
 
   return (
     <div className="space-y-4">

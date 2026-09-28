@@ -1,6 +1,5 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
 import { getProductApi, updateProductApi } from "@/api/productsApi";
 import type { Product } from "@/types/product";
 
@@ -8,8 +7,6 @@ import PageContainer from "@/components/layout/PageContainer";
 import {
   ArrowLeft,
   Upload,
-  X,
-  Plus,
   Trash2,
   Save,
   Eye,
@@ -27,31 +24,22 @@ export interface ProductFormData {
 
 }
 const ProductDetails = () => {
-  const [productImages, setProductImages] = useState([
-    "/products/shirt-1.jpg",
-    "/products/shirt-2.jpg",
-    "/products/shirt-3.jpg",
-  ]);
-
-    const { user } = useAuth();
     const [product, setProduct] = useState<Product[]>([]);
-  
+
     // const [logoPreview, setLogoPreview] = useState("");
     // const [bannerPreview, setBannerPreview] = useState("");
-  
-    const [productFile, setProductFile] = useState(null);
+
     // const [bannerFile, setBannerFile] = useState(null);
-  
+
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
 
     const { product_id } = useParams(); 
-    const loadProduct = async () => {
+    const loadProduct = useCallback(async () => {
         setLoading(true);
         try{
             if (product_id){
                 const product_data = await getProductApi(product_id);
-                console.log('fetched', product_data);
                 setProduct(product_data);
             }
         } catch (error) {
@@ -59,13 +47,15 @@ const ProductDetails = () => {
         } finally{
             setLoading(false);
         }
-    }
+    }, [product_id]);
 
     useEffect(() => {
-        loadProduct();
-    }, []);
+        void loadProduct();
+    }, [loadProduct]);
 
-    const handleChange = (e) => {
+    const handleChange = (
+        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
+    ) => {
 
         const { name, value } = e.target;
         console.log('fired', name, value, e.target.value);

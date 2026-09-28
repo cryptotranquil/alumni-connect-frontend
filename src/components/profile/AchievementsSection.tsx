@@ -37,7 +37,7 @@ export function AchievementsSection({ userId, isOwn, onActivityChanged }: Achiev
 
   useEffect(() => {
     void reload();
-  }, [userId]);
+  }, [reload]);
 
   const save = async () => {
     if (!form.title.trim()) return;

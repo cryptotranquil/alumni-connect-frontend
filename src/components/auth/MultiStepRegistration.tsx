@@ -16,7 +16,7 @@ import {
   UserRound,
   Zap,
 } from "lucide-react";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
 import { getDepartmentsApi, type Department } from "../../api/userApi";
 import { getProgrammesForDepartment, parseStudentId, CAMPUSES } from "../../data";
 import { Select } from "../shared/Select";

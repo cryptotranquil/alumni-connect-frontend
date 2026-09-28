@@ -1,35 +1,25 @@
 import {
-  createContext,
-  useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
 import { io, type Socket } from "socket.io-client";
-import { useAuth } from "./AuthContext";
+import { useAuth } from "./useAuth";
 import { getSocketBaseUrl } from "../lib/socketUrl";
-
-type SocketContextValue = { socket: Socket | null };
-
-const SocketContext = createContext<SocketContextValue>({ socket: null });
+import { SocketContext } from "./SocketContextValue";
 
 /** Fired on connection-related socket events so sidebars can refetch counts. */
 export const AC_SOCKET_EVENT = "ac-socket";
 
-// NEW: Notification event types
-export type NotificationEventType =
-  | "notification:new"
-  | "notification:read"
-  | "notification:deleted";
-
 export function SocketProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const [socket, setSocket] = useState<Socket | null>(null);
+  const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
     if (!user?.token) {
-      setSocket(null);
       return;
     }
 
@@ -38,7 +28,12 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       transports: ["websocket", "polling"],
     });
 
-    setSocket(s);
+    socketRef.current = s;
+    queueMicrotask(() => {
+      if (socketRef.current === s) {
+        setSocket(s);
+      }
+    });
 
     const notify = () => window.dispatchEvent(new Event(AC_SOCKET_EVENT));
 
@@ -62,6 +57,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     });
 
     return () => {
+      socketRef.current = null;
       s.off("connection:incoming", notify);
       s.off("connection:accepted", notify);
       s.off("connection:rejected", notify);
@@ -79,6 +75,4 @@ export function SocketProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function useSocket() {
-  return useContext(SocketContext);
-}
+export default SocketProvider;

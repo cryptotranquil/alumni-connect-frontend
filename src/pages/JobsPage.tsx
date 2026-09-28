@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import PageContainer from "../components/layout/PageContainer";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 import {
   getJobsApi,
   createJobApi,
@@ -11,6 +11,7 @@ import {
 } from "../api/jobApi";
 import type { Job, DirectoryUser } from "../types";
 import { getStudentsDirectoryApi } from "../api/directoryApi";
+import { getErrorMessage } from "@/api/client";
 
 export interface JobFormData {
   title: string;
@@ -160,8 +161,8 @@ export function JobDetailModal({
     try {
       await onApply(job._id);
       onClose();
-    } catch (err: any) {
-      setApplyError(err.message || "Failed to apply for this job");
+    } catch (err) {
+      setApplyError(getErrorMessage(err, "Failed to apply for this job"));
     } finally {
       setApplying(false);
     }
@@ -512,26 +513,6 @@ export function PostJobModal({
 
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
-
-  // Update form when editJob changes
-  useEffect(() => {
-    if (editJob) {
-      setForm({
-        title: editJob.title || "",
-        company: editJob.company || "",
-        location: editJob.location || "",
-        description: editJob.description || "",
-        type: editJob.type || "full-time",
-        requirements: editJob.requirements?.join(", ") || "",
-        salary: editJob.salary || "",
-        deadline: editJob.deadline || "",
-        contactEmail: editJob.contactEmail || "",
-      });
-      // Reset validation state when editing different job
-      setFieldErrors({});
-      setTouched({});
-    }
-  }, [editJob]);
 
   const set =
     (key: keyof JobFormData) =>
@@ -906,9 +887,7 @@ const JobsPage = () => {
     user?.role === "student" ||
     user?.role === "admin";
 
-  const fetchJobs = async () => {
-    setLoading(true);
-    setFetchError("");
+  const loadJobs = useCallback(async () => {
     try {
       const data = await getJobsApi();
       const visible =
@@ -916,19 +895,25 @@ const JobsPage = () => {
           ? data
           : data.filter((j) => j.status === "approved");
       setJobs(visible);
-    } catch (err: any) {
+    } catch (err) {
       console.error("Failed to fetch jobs:", err);
       setFetchError(
-        err.message || "Failed to load jobs. Please try again later.",
+        getErrorMessage(err, "Failed to load jobs. Please try again later."),
       );
     } finally {
       setLoading(false);
     }
+  }, [user?.role]);
+
+  const fetchJobs = async () => {
+    setLoading(true);
+    setFetchError("");
+    await loadJobs();
   };
 
   useEffect(() => {
-    fetchJobs();
-  }, [user]);
+    void loadJobs();
+  }, [loadJobs]);
 
   const handleSubmit = async (form: JobFormData) => {
     // Validate form first
@@ -974,11 +959,13 @@ const JobsPage = () => {
       }
       setShowPostModal(false);
       await fetchJobs(); // Refresh the job list
-    } catch (err: any) {
+    } catch (err) {
       console.error("Job operation failed:", err);
       setPostError(
-        err.message ||
+        getErrorMessage(
+          err,
           "Failed to save job. Please check your connection and try again.",
+        )
       );
     } finally {
       setSubmitting(false);
@@ -996,9 +983,9 @@ const JobsPage = () => {
       setSuccess("Application submitted successfully!");
       // Optionally refresh jobs to update applicant count
       await fetchJobs();
-    } catch (err: any) {
+    } catch (err) {
       console.error("Application failed:", err);
-      throw new Error(err.message || "Failed to submit application");
+      throw new Error(getErrorMessage(err, "Failed to submit application"));
     }
   };
 
@@ -1256,6 +1243,7 @@ const JobsPage = () => {
       {/* Post/Edit Job Modal */}
       {showPostModal && (
         <PostJobModal
+          key={editingJob?._id ?? "new-job"}
           onClose={() => {
             setShowPostModal(false);
             setPostError("");

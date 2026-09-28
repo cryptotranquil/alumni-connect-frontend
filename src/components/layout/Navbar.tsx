@@ -1,4 +1,4 @@
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
 import NotificationBell from "../ui/NotificationBell"; // NEW
 
 interface NavbarProps {
