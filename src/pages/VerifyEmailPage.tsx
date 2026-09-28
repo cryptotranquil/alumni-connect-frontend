@@ -1,12 +1,28 @@
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { VerifyCodeCard } from "../components/auth/VerifyCodeCard";
-import { DEMO_CODE } from "../lib/demoCode";
+import { resendEmailCodeApi, verifyEmailApi } from "../api/authApi";
+import { useAuth } from "../context/AuthContext";
 import LogoHeader from "../components/layout/LogoHeader";
 import Background from "../components/layout/Background";
 
 const VerifyEmailPage = () => {
+  const [params] = useSearchParams();
+  const { user } = useAuth();
+  const email = params.get("email") ?? user?.email ?? "";
+
   const handleVerify = async (code: string) => {
-    return code === DEMO_CODE;
+    if (!email) return false;
+    try {
+      await verifyEmailApi(email, code);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const handleResend = async () => {
+    if (!email) return;
+    await resendEmailCodeApi(email);
   };
 
   return (
@@ -18,8 +34,9 @@ const VerifyEmailPage = () => {
             <VerifyCodeCard
               title="Verify your email"
               subtitle="Confirm your email address to activate your Alumni Connect account."
-              destination="you@example.com"
+              destination={email || "your registered email"}
               onVerify={handleVerify}
+              onResend={handleResend}
               successTitle="Email verified successfully!"
               successDescription="Your account is active. You can now sign in and start connecting with the Exploits University community."
               successAction={
@@ -38,7 +55,6 @@ const VerifyEmailPage = () => {
                   ← Back to sign in
                 </Link>
               }
-              demoHint={`Demo: use code ${DEMO_CODE}`}
             />
           </div>
         </div>

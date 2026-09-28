@@ -35,28 +35,40 @@ import {
 import PageContainer from "../../components/layout/PageContainer";
 import { getDashboardStatsApi, getPendingAlumniApi } from "../../api/userApi";
 import { getJobsApi } from "../../api/jobApi";
-import { getAnalyticsDataset } from "../../data";
+import { getAnalyticsDatasetApi } from "../../api/analyticsApi";
+import type { AnalyticsDataset } from "../../types/analytics";
 import { StatCard, CardSkeleton, SectionHeader } from "../../components/shared";
 
 const COLORS = ["#27155f", "#3a2080", "#e40d0a", "#10b981", "#f59e0b", "#6366f1"];
+
+const EMPTY_ENGAGEMENT: AnalyticsDataset["engagement"] = {
+  posts: 0,
+  likes: 0,
+  comments: 0,
+  connections: 0,
+  eventParticipants: 0,
+  mentorship: 0,
+};
 
 const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<Awaited<ReturnType<typeof getDashboardStatsApi>> | null>(null);
   const [pendingAlumniCount, setPendingAlumniCount] = useState(0);
   const [pendingJobsCount, setPendingJobsCount] = useState(0);
-  const [dataset] = useState(() => getAnalyticsDataset());
+  const [dataset, setDataset] = useState<AnalyticsDataset | null>(null);
 
   useEffect(() => {
     Promise.allSettled([
       getDashboardStatsApi(),
       getPendingAlumniApi(),
       getJobsApi(),
-    ]).then(([s, pa, jr]) => {
+      getAnalyticsDatasetApi(),
+    ]).then(([s, pa, jr, an]) => {
       if (s.status === "fulfilled") setStats(s.value);
       if (pa.status === "fulfilled") setPendingAlumniCount(pa.value.length);
       if (jr.status === "fulfilled")
         setPendingJobsCount(jr.value.filter((j) => j.status === "pending").length);
+      if (an.status === "fulfilled") setDataset(an.value);
     }).finally(() => setLoading(false));
   }, []);
 
@@ -67,9 +79,8 @@ const AdminDashboard = () => {
     year: "numeric",
   });
 
-  const totalUsers = (stats?.users.total ?? 1841)
-    .toLocaleString();
-  const engagement = dataset.engagement;
+  const totalUsers = (stats?.users.total ?? 0).toLocaleString();
+  const engagement = dataset?.engagement ?? EMPTY_ENGAGEMENT;
 
   return (
     <PageContainer title="Admin Console" showLogo>
@@ -193,19 +204,19 @@ const AdminDashboard = () => {
             <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
               <div>
                 <p className="text-2xl font-bold text-foreground">
-                  {(stats?.mentorship.total ?? 216).toLocaleString()}
+                  {(stats?.mentorship.total ?? 0).toLocaleString()}
                 </p>
                 <p className="text-xs text-muted-foreground">Total pairings</p>
               </div>
               <div>
                 <p className="text-2xl font-bold text-brand-primary">
-                  {stats?.mentorship.active ?? 33}
+                  {stats?.mentorship.active ?? 0}
                 </p>
                 <p className="text-xs text-muted-foreground">Active now</p>
               </div>
               <div>
                 <p className="text-2xl font-bold text-brand-red">
-                  {stats?.mentorship.pending ?? 31}
+                  {stats?.mentorship.pending ?? 0}
                 </p>
                 <p className="text-xs text-muted-foreground">Pending matches</p>
               </div>
@@ -219,19 +230,19 @@ const AdminDashboard = () => {
             <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
               <div>
                 <p className="text-2xl font-bold text-foreground">
-                  {stats?.jobs.total ?? 64}
+                  {stats?.jobs.total ?? 0}
                 </p>
                 <p className="text-xs text-muted-foreground">Total postings</p>
               </div>
               <div>
                 <p className="text-2xl font-bold text-emerald-600">
-                  {stats?.jobs.active ?? 42}
+                  {stats?.jobs.active ?? 0}
                 </p>
                 <p className="text-xs text-muted-foreground">Active</p>
               </div>
               <div>
                 <p className="text-2xl font-bold text-amber-500">
-                  {stats?.jobs.pending ?? 5}
+                  {stats?.jobs.pending ?? 0}
                 </p>
                 <p className="text-xs text-muted-foreground">Pending review</p>
               </div>
@@ -245,19 +256,19 @@ const AdminDashboard = () => {
             <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
               <div>
                 <p className="text-2xl font-bold text-foreground">
-                  {stats?.events.total ?? 28}
+                  {stats?.events.total ?? 0}
                 </p>
                 <p className="text-xs text-muted-foreground">Total events</p>
               </div>
               <div>
                 <p className="text-2xl font-bold text-brand-red">
-                  {stats?.events.upcoming ?? 9}
+                  {stats?.events.upcoming ?? 0}
                 </p>
                 <p className="text-xs text-muted-foreground">Upcoming</p>
               </div>
               <div className="hidden sm:block">
                 <p className="text-2xl font-bold text-indigo-500">
-                  {dataset.career.applications}
+                  {dataset?.career.applications ?? 0}
                 </p>
                 <p className="text-xs text-muted-foreground">Applications</p>
               </div>
@@ -272,7 +283,7 @@ const AdminDashboard = () => {
             <SectionHeader icon={BarChart3} title="New Registrations (2026)" />
             <div className="mt-4">
               <ResponsiveContainer width="100%" height={260}>
-                <BarChart data={dataset.newRegistrations} barGap={2}>
+                <BarChart data={dataset?.newRegistrations ?? []} barGap={2}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#eee" vertical={false} />
                   <XAxis dataKey="month" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} width={30} />
@@ -292,7 +303,7 @@ const AdminDashboard = () => {
               <ResponsiveContainer width="100%" height={260}>
                 <PieChart>
                   <Pie
-                    data={dataset.studentsVsAlumni}
+                    data={dataset?.studentsVsAlumni ?? []}
                     dataKey="value"
                     nameKey="name"
                     cx="50%"
@@ -301,7 +312,7 @@ const AdminDashboard = () => {
                     outerRadius={90}
                     paddingAngle={3}
                   >
-                    {dataset.studentsVsAlumni.map((_, i) => (
+                    {(dataset?.studentsVsAlumni ?? []).map((_, i) => (
                       <Cell key={i} fill={COLORS[i % COLORS.length]} />
                     ))}
                   </Pie>
@@ -317,7 +328,7 @@ const AdminDashboard = () => {
             <SectionHeader icon={Activity} title="Active Users Trend" />
             <div className="mt-4">
               <ResponsiveContainer width="100%" height={260}>
-                <LineChart data={dataset.activeUsers}>
+                <LineChart data={dataset?.activeUsers ?? []}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#eee" vertical={false} />
                   <XAxis dataKey="month" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} width={30} />
@@ -341,7 +352,7 @@ const AdminDashboard = () => {
             <SectionHeader icon={Radar} title="Users by Department" />
             <div className="mt-4">
               <ResponsiveContainer width="100%" height={260}>
-                <BarChart data={dataset.alumniByDepartment} layout="vertical">
+                <BarChart data={dataset?.alumniByDepartment ?? []} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" stroke="#eee" horizontal={false} />
                   <XAxis type="number" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
                   <YAxis

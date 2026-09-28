@@ -9,7 +9,6 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import { SocketProvider } from "./context/SocketContext";
 
 // Pages
-import AlumniBusinesses from "./pages/businesses";
 import BusinessesPage from "./pages/alumni/businessesPage";
 import BusinessDetailPage from "./pages/alumni/businessDetailPage";
 import ProductsPage from "./pages/alumni/productsPage";

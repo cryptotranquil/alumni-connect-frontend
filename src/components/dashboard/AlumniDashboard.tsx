@@ -19,7 +19,9 @@ import { getEventsApi } from "../../api/eventApi";
 import { getProfileApi } from "../../api/userApi";
 import { getFeedApi } from "../../api/postApi";
 import { getAlumniConnectionsApi } from "../../api/connectionApi";
+import { getProfileSuggestionsApi } from "../../api/profileApi";
 import type { Job, Event, Post, User } from "../../types";
+import type { ProfileSuggestion } from "../../types/profile";
 import {
   StatCard,
   Progress,
@@ -30,7 +32,6 @@ import {
   CardSkeleton,
   ListCardSkeleton,
 } from "../shared";
-import { MOCK_ALUMNI } from "../../data";
 
 function timeAgo(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
@@ -68,6 +69,7 @@ const AlumniDashboardPage = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [posts, setPosts] = useState<Post[]>([]);
   const [pendingRequests, setPendingRequests] = useState(0);
+  const [suggestions, setSuggestions] = useState<ProfileSuggestion[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -77,13 +79,15 @@ const AlumniDashboardPage = () => {
       getEventsApi(),
       getFeedApi(),
       getAlumniConnectionsApi(),
+      getProfileSuggestionsApi().catch(() => null),
     ])
-      .then(([p, j, e, postsData, conn]) => {
+      .then(([p, j, e, postsData, conn, sugg]) => {
         setProfile(p);
         setMyJobs(j.filter((job) => job.postedBy?._id === p?._id).slice(0, 3));
         setEvents(e.slice(0, 3));
         setPosts(postsData.slice(0, 3));
         setPendingRequests(conn.pending.length);
+        setSuggestions(sugg?.peopleYouMayKnow.slice(0, 4) ?? []);
       })
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -91,7 +95,7 @@ const AlumniDashboardPage = () => {
 
   const completion = useMemo(() => profileCompletion(profile ?? user), [profile, user]);
   const firstName = (profile?.name ?? user?.name ?? "Alumni").split(" ")[0];
-  const peopleYouMayKnow = MOCK_ALUMNI.filter((a) => a._id !== profile?._id).slice(0, 4);
+  const peopleYouMayKnow = suggestions;
 
   return (
     <PageContainer title="Alumni Dashboard" showLogo>
@@ -328,6 +332,11 @@ const AlumniDashboardPage = () => {
                 People You May Know
               </h3>
               <div className="mt-3 space-y-3">
+                {peopleYouMayKnow.length === 0 && !loading && (
+                  <p className="text-sm text-muted-foreground">
+                    No suggestions yet — grow your network to see peers here.
+                  </p>
+                )}
                 {peopleYouMayKnow.map((person) => (
                   <div key={person._id} className="flex items-center gap-3">
                     <InitialsAvatar name={person.name} src={person.profilePhoto} className="h-9 w-9" />
@@ -336,11 +345,11 @@ const AlumniDashboardPage = () => {
                         {person.name}
                       </p>
                       <p className="truncate text-xs text-muted-foreground">
-                        {person.position} · {person.company}
+                        {person.headline ?? "Exploits University"}
                       </p>
                     </div>
                     <Link
-                      to="/alumni"
+                      to={`/profile/${person._id}`}
                       className="shrink-0 rounded-md border border-input px-2.5 py-1 text-xs font-medium text-foreground hover:bg-accent"
                     >
                       View

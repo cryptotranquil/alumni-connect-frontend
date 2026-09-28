@@ -9,8 +9,8 @@ import {
   referStudentApi,
   hasReferredApi,
 } from "../api/jobApi";
-import type { Job } from "../types";
-import { MOCK_STUDENTS } from "../data";
+import type { Job, DirectoryUser } from "../types";
+import { getStudentsDirectoryApi } from "../api/directoryApi";
 
 export interface JobFormData {
   title: string;
@@ -380,8 +380,17 @@ export function ReferJobModal({
 }) {
   const [studentId, setStudentId] = useState("");
   const [note, setNote] = useState("");
+  const [students, setStudents] = useState<DirectoryUser[]>([]);
+  const [loadingStudents, setLoadingStudents] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState("");
+
+  useEffect(() => {
+    getStudentsDirectoryApi()
+      .then((res) => setStudents(res.students ?? []))
+      .catch(() => setStudents([]))
+      .finally(() => setLoadingStudents(false));
+  }, []);
 
   const submit = async () => {
     if (!studentId) {
@@ -430,8 +439,10 @@ export function ReferJobModal({
           onChange={(e) => setStudentId(e.target.value)}
           className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a6e]"
         >
-          <option value="">Select a student…</option>
-          {MOCK_STUDENTS.map((s) => (
+          <option value="">
+            {loadingStudents ? "Loading students…" : "Select a student…"}
+          </option>
+          {students.map((s) => (
             <option key={s._id} value={s._id}>
               {s.name} — {s.program || s.department || "Student"}
             </option>

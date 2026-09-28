@@ -1,32 +1,7 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AtSign } from "lucide-react";
-import { MOCK_ALUMNI, MOCK_STUDENTS } from "../../data";
+import { getMentionCandidatesApi, type MentionCandidate } from "../../api/userApi";
 import { InitialsAvatar } from "../shared";
-
-export interface MentionCandidate {
-  _id: string;
-  name: string;
-  role: string;
-  program?: string;
-  graduationYear?: string;
-}
-
-const CANDIDATES: MentionCandidate[] = [
-  ...MOCK_ALUMNI.map((a) => ({
-    _id: a._id,
-    name: a.name,
-    role: "alumni",
-    program: a.department,
-    graduationYear: a.graduationYear,
-  })),
-  ...MOCK_STUDENTS.map((s) => ({
-    _id: s._id,
-    name: s.name,
-    role: "student",
-    program: s.department,
-    graduationYear: s.graduationYear,
-  })),
-];
 
 interface TagUserInputProps {
   value: string;
@@ -49,14 +24,34 @@ export function TagUserInput({
 }: TagUserInputProps) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [candidates, setCandidates] = useState<MentionCandidate[]>([]);
+  const [loading, setLoading] = useState(false);
   const boxRef = useRef<HTMLTextAreaElement>(null);
+  const requestId = useRef(0);
 
-  const suggestions = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return CANDIDATES.filter(
-      (c) => !q || c.name.toLowerCase().includes(q),
-    ).slice(0, 6);
-  }, [query]);
+  useEffect(() => {
+    if (!open) return;
+    const id = requestId.current + 1;
+    requestId.current = id;
+    const timer = setTimeout(() => {
+      setLoading(true);
+      getMentionCandidatesApi(query)
+        .then((list) => {
+          if (requestId.current !== id) return;
+          setCandidates(list.slice(0, 6));
+        })
+        .catch(() => {
+          if (requestId.current !== id) return;
+          setCandidates([]);
+        })
+        .finally(() => {
+          if (requestId.current === id) setLoading(false);
+        });
+    }, 180);
+    return () => clearTimeout(timer);
+  }, [open, query]);
+
+  const suggestions = candidates;
 
   const handleChange = (next: string) => {
     onChange(next);
@@ -87,7 +82,7 @@ export function TagUserInput({
     boxRef.current?.focus();
   };
 
-  const mentionIsActive = open && suggestions.length > 0;
+  const mentionIsActive = open;
 
   return (
     <div className="relative w-full">
@@ -104,6 +99,16 @@ export function TagUserInput({
           <p className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
             <AtSign className="h-3.5 w-3.5" /> Mention a member
           </p>
+          {loading && (
+            <p className="px-3 py-2 text-xs text-muted-foreground">
+              Searching members…
+            </p>
+          )}
+          {!loading && suggestions.length === 0 && (
+            <p className="px-3 py-2 text-xs text-muted-foreground">
+              No members match “{query}”.
+            </p>
+          )}
           {suggestions.map((c) => (
             <button
               key={c._id}

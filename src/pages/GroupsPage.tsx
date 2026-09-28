@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Loader2, MessageSquare, Users, X } from "lucide-react";
 import PageContainer from "../components/layout/PageContainer";
-import type { Post } from "../types";
+import type { Group, Post } from "../types";
 import {
   getGroupMemberNamesApi,
   getGroupPostsApi,
@@ -9,7 +9,6 @@ import {
   isInGroupApi,
   toggleJoinGroupApi,
 } from "../api/groupsApi";
-import type { Group } from "../data/mockGroups";
 import { Spinner } from "../components/shared";
 import { timeAgo } from "../lib/timeAgo";
 
