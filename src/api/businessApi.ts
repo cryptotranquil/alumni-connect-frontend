@@ -20,10 +20,8 @@ export async function getBusinessApi(business_id: string): Promise<Business[]> {
 }
 
 export async function createBusinessApi(data: Partial<Business>): Promise<Business> {
-  console.log(data);
   try {
     const { data: business } = await api.post<Business>("/businesses", data);
-    console.log("business", business);
     return business;
   } catch (e) {
     throw new Error(getErrorMessage(e, "Failed to create a business"));
@@ -33,7 +31,6 @@ export async function createBusinessApi(data: Partial<Business>): Promise<Busine
 export async function updateBusinessApi(business_id: string, data: FormData): Promise<Business> {
   try {
     const { data: updatedBusiness } = await api.put<Business>(`/businesses/${business_id}`, data);
-    // console.log(data);
     return updatedBusiness;
   } catch (e) {
     throw new Error(getErrorMessage(e, "Failed to update a business"));

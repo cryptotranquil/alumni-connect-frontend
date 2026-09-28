@@ -113,7 +113,12 @@ const AlumniStudentsPage = () => {
                       </div>
                       <div>
                         <p className="font-semibold text-gray-900">
-                          {row.student.name}
+                          <Link
+                            to={`/profile/${row.student._id}`}
+                            className="hover:underline"
+                          >
+                            {row.student.name}
+                          </Link>
                         </p>
                         <p className="text-xs text-gray-500">
                           Wants to connect · {row.student.email}
@@ -165,19 +170,32 @@ const AlumniStudentsPage = () => {
                       </div>
                       <div className="min-w-0">
                         <p className="font-medium text-gray-900 truncate">
-                          {row.student.name}
+                          <Link
+                            to={`/profile/${row.student._id}`}
+                            className="hover:underline"
+                          >
+                            {row.student.name}
+                          </Link>
                         </p>
                         <p className="text-xs text-gray-500 truncate">
                           {row.student.email}
                         </p>
                       </div>
                     </div>
-                    <Link
-                      to={`/messages?with=${row.student._id}`}
-                      className="shrink-0 rounded-lg bg-[#1e3a6e] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#162d57]"
-                    >
-                      Chat
-                    </Link>
+                    <div className="flex shrink-0 gap-2">
+                      <Link
+                        to={`/profile/${row.student._id}`}
+                        className="rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+                      >
+                        Profile
+                      </Link>
+                      <Link
+                        to={`/messages?with=${row.student._id}`}
+                        className="rounded-lg bg-[#1e3a6e] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#162d57]"
+                      >
+                        Chat
+                      </Link>
+                    </div>
                   </li>
                 ))}
               </ul>

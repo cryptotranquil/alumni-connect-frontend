@@ -58,7 +58,6 @@ const ProductDetails = () => {
     ) => {
 
         const { name, value } = e.target;
-        console.log('fired', name, value, e.target.value);
 
         setProduct((prev) => {
         return [{
@@ -66,7 +65,7 @@ const ProductDetails = () => {
         }];
         });
     };
-    console.log('product details',product_id, product);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
     
@@ -85,19 +84,11 @@ const ProductDetails = () => {
             // if (logoFile) {
             //   data.append("logo", logoFile.name);
             // }
-           
-            
-                  console.log(data);
-    
+
             if (product_id && data){
               await updateProductApi(product[0]._id, data);
             }
-          console.log(data);
-    
-          // console.log("Business data:", business);
-          // console.log("Logo:", logoFile);
-          // console.log("Banner:", bannerFile.name);
-          
+
           alert("Business updated successfully!");
         } catch (error) {
           console.error("Failed to update business:", error);

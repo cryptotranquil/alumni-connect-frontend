@@ -368,7 +368,14 @@ const AlumniDirectoryPage = () => {
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h3 className="font-semibold text-gray-900">{a.name}</h3>
+                    <h3 className="font-semibold text-gray-900">
+                      <Link
+                        to={`/profile/${a._id}`}
+                        className="hover:underline"
+                      >
+                        {a.name}
+                      </Link>
+                    </h3>
                     {a.position && (
                       <p className="text-sm text-gray-600">
                         {a.position}
@@ -395,6 +402,12 @@ const AlumniDirectoryPage = () => {
                 <SkillBadges skills={a.skills} />
 
                 <div className="mt-4 flex flex-wrap gap-2">
+                  <Link
+                    to={`/profile/${a._id}`}
+                    className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    View Profile
+                  </Link>
                   {user?.role === "student" && (
                     <>
                       {st === "accepted" && (

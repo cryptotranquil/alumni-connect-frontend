@@ -53,7 +53,6 @@ const BusinessDetail = () => {
   ) => {
 
     const { name, value } = e.target;
-    console.log('fired', name, value, e.target.value);
 
     setBusiness((prev) => {
       return [{
@@ -73,7 +72,6 @@ const BusinessDetail = () => {
 
   const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const banner = e.target.files?.[0];
-    console.log(banner);
     if (!banner) return;
 
     setBannerFile(banner);
@@ -102,16 +100,9 @@ const BusinessDetail = () => {
         if (bannerFile) {
           data.append("banner", bannerFile);
         }
-        console.log('form data', data);
         if (business_id && data){
           await updateBusinessApi(business[0]._id, data);
         }
-      console.log(data);
-
-      console.log("Business data:", business);
-      // console.log("Logo:", logoFile);
-      // console.log("Banner:", bannerFile.name);
-      
       alert("Business updated successfully!");
     } catch (error) {
       console.error("Failed to update business:", error);

@@ -303,7 +303,7 @@ const StudentDashboard = () => {
                   {myMentors.map((row) => (
                     <Link
                       key={row._id}
-                      to="/alumni"
+                      to={`/profile/${row.alumni._id}`}
                       className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-accent"
                     >
                       <InitialsAvatar

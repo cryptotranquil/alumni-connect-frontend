@@ -8,7 +8,6 @@ import {
   deleteNotificationApi,
 } from "../../api/notificationApi";
 import type { Notification } from "../../types";
-import type { NotificationEventDetail } from "../../types/notificationEvents";
 // import { useSocket } from "../../context/useSocket";
 import { formatDistanceToNow } from "date-fns";
 
@@ -27,18 +26,14 @@ const NotificationBell = () => {
 
   // Listen for real-time notifications via custom events (since socket emits custom events)
   useEffect(() => {
-    const handleNewNotification = (event: CustomEvent<NotificationEventDetail>) => {
-      const data = event.detail;
+    const handleNewNotification = () => {
       setUnreadCount((prev) => prev + 1);
       if (isOpen) {
-        console.log(data);
         fetchNotifications();
       }
     };
 
-    const handleNotificationRead = (event: CustomEvent<NotificationEventDetail>) => {
-      const data = event.detail;
-      console.log(data);
+    const handleNotificationRead = () => {
       if (isOpen) {
         fetchNotifications();
       }

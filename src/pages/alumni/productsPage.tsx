@@ -384,7 +384,6 @@ export function PostProductModal({
 
   const handleSubmit = () => {
     // Mark all fields as touched
-    console.log('btn clicked');
     const allTouched = Object.keys(form).reduce(
       (acc, key) => {
         acc[key as keyof ProductFormData] = true;
@@ -393,15 +392,12 @@ export function PostProductModal({
       {} as Record<string, boolean>,
     );
     setTouched(allTouched);
-    console.log(form);
     // Validate form
     const validation = validateProductForm(form);
-        console.log(form);
 
     if (!validation.isValid) {
       setFieldErrors(validation.errors);
       // Scroll to first error
-      console.log(validation.errors);
       const firstErrorField = Object.keys(validation.errors)[0];
       const errorElement = document.getElementById(`field-${firstErrorField}`);
       if (errorElement) {
@@ -409,13 +405,11 @@ export function PostProductModal({
       }
       return;
     }
-    console.log(form);
 
     onSubmit(form);
   };
 
   const isEditing = !!editProduct;
-  // console.log(business);
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
@@ -759,10 +753,8 @@ const ProductsPage = () => {
         // await updateBusinessApi(editingBusiness._id, productData);
         // setSuccess("Job updated successfully!");
         // setEditingBusiness(null);
-        console.log(productData);
       } else {
         // Create new job
-        console.log(productData);
         await createProductApi(productData);
         const msg =
           user?.role === "admin"

@@ -11,6 +11,10 @@ import {
   Star,
 } from "lucide-react";
 
+/** Neutral placeholder for products uploaded without an image. */
+const PLACEHOLDER_IMAGE =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Crect width='400' height='400' fill='%23f3f4f6'/%3E%3Ctext x='200' y='206' font-family='sans-serif' font-size='24' fill='%239ca3af' text-anchor='middle'%3ENo image%3C/text%3E%3C/svg%3E";
+
 
 export default function ProductDetails() {
   const [product, setProduct] = useState<Product[]>([]);
@@ -40,21 +44,9 @@ const loadProduct = useCallback(() => {
 useEffect(() => {
     void loadProduct();
 }, [loadProduct]);
-// console.log(product[0]?.businessId.name);
+
   const formatPrice = (price: number) =>
     `MWK ${price.toLocaleString()}`;
-
-//   const nextImage = () => {
-//     setActiveImage((current) =>
-//       current === product.images.length - 1 ? 0 : current + 1
-//     );
-//   };
-
-//   const previousImage = () => {
-//     setActiveImage((current) =>
-//       current === 0 ? product.images.length - 1 : current - 1
-//     );
-//   };
 
   const orderOnWhatsApp = () => {
     const message = `Hello ${product[0].name},
@@ -80,42 +72,7 @@ useEffect(() => {
     <PageContainer title="Product Details">
         <div className="min-h-screen bg-gray-50">
 
-        {/* Page Header */}
-        {/* <div className="border-b bg-white">
-            <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-4">
-
-            <button
-                onClick={() => window.history.back()}
-                className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-gray-100"
-            >
-                <ArrowLeft size={20} />
-            </button>
-
-            <div>
-                <p className="text-xs text-gray-500">
-                Products
-                </p>
-
-                <h1 className="font-semibold text-gray-900">
-                Product Details
-                </h1>
-            </div>
-
-            </div>
-        </div> */}
-
         <main className="mx-auto max-w-7xl px-4 py-6">
-
-            {/* Breadcrumb */}
-            {/* <div className="mb-6 flex items-center gap-2 text-sm text-gray-500">
-            <span>Home</span>
-            <span>/</span>
-            <span>{product.category}</span>
-            <span>/</span>
-            <span className="text-gray-900">
-                {product.name}
-            </span>
-            </div> */}
 
             {/* Main Product */}
             <div className="grid gap-8 rounded-2xl bg-white p-5 shadow-sm lg:grid-cols-2 lg:p-8">
@@ -125,75 +82,17 @@ useEffect(() => {
 
                 <div className="relative aspect-square overflow-hidden rounded-xl bg-gray-100">
 
-                {/* Discount */}
-                {/* <div className="absolute left-4 top-4 z-10 rounded-full bg-red-500 px-3 py-1 text-sm font-semibold text-white">
-                    {discount}% OFF
-                </div> */}
-
-                {/* Wishlist */}
-                {/* <button
-                    onClick={() => setLiked(!liked)}
-                    className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white shadow"
-                >
-                    <Heart
-                    size={20}
-                    className={
-                        liked
-                        ? "fill-red-500 text-red-500"
-                        : "text-gray-700"
-                    }
-                    />
-                </button> */}
-
-                {/* Previous */}
-                {/* <button
-                    onClick={previousImage}
-                    className="absolute left-3 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 shadow"
-                >
-                    <ChevronLeft size={20} />
-                </button> */}
-
                 {/* Image */}
                 <img
-                    src="../../iphone2.jpg"
+                    src={product[0]?.imageUrl ?? PLACEHOLDER_IMAGE}
                     alt={product[0]?.name}
                     className="h-full w-full object-contain p-8"
                 />
 
-                {/* Next */}
-                {/* <button
-                    onClick={nextImage}
-                    className="absolute right-3 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 shadow"
-                >
-                    <ChevronRight size={20} />
-                </button> */}
-
                 </div>
 
-                {/* Thumbnails */}
-                {/* <div className="mt-4 grid grid-cols-4 gap-3">
-
-                {product.images.map((image, index) => (
-                    <button
-                    key={image}
-                    onClick={() => setActiveImage(index)}
-                    className={`aspect-square overflow-hidden rounded-lg border-2 ${
-                        activeImage === index
-                        ? "border-gray-900"
-                        : "border-transparent"
-                    }`}
-                    >
-                    <img
-                        src={image}
-                        alt={`${product.name} ${index + 1}`}
-                        className="h-full w-full object-cover"
-                    />
-                    </button>
-                ))}
-
-                </div> */}
-
             </div>
+
 
             {/* ================= INFORMATION ================= */}
             <div>
@@ -271,60 +170,6 @@ useEffect(() => {
                 </p>
                 </div>
 
-                {/* Color */}
-                {/* <div className="mt-6">
-
-                <h3 className="mb-3 text-sm font-semibold text-gray-900">
-                    Color: {selectedColor}
-                </h3>
-
-                <div className="flex flex-wrap gap-2">
-
-                    {product.colors.map((color) => (
-                    <button
-                        key={color}
-                        onClick={() => setSelectedColor(color)}
-                        className={`rounded-lg border px-5 py-2 text-sm ${
-                        selectedColor === color
-                            ? "border-gray-900 bg-gray-900 text-white"
-                            : "border-gray-300 bg-white text-gray-700"
-                        }`}
-                    >
-                        {color}
-                    </button>
-                    ))}
-
-                </div>
-
-                </div> */}
-
-                {/* Size */}
-                {/* <div className="mt-6">
-
-                <h3 className="mb-3 text-sm font-semibold text-gray-900">
-                    Size
-                </h3>
-
-                <div className="flex gap-2">
-
-                    {product.sizes.map((size) => (
-                    <button
-                        key={size}
-                        onClick={() => setSelectedSize(size)}
-                        className={`flex h-10 w-12 items-center justify-center rounded-lg border text-sm ${
-                        selectedSize === size
-                            ? "border-gray-900 bg-gray-900 text-white"
-                            : "border-gray-300"
-                        }`}
-                    >
-                        {size}
-                    </button>
-                    ))}
-
-                </div>
-
-                </div> */}
-
                 {/* WhatsApp Button */}
                 <button
                 onClick={orderOnWhatsApp}
@@ -333,32 +178,6 @@ useEffect(() => {
                 <MessageCircle size={22} />
                 Order on WhatsApp
                 </button>
-
-                {/* Share / Wishlist */}
-                {/* <div className="mt-4 flex gap-3">
-
-                <button
-                    onClick={() => setLiked(!liked)}
-                    className="flex flex-1 items-center justify-center gap-2 rounded-lg border py-3 text-sm font-medium hover:bg-gray-50"
-                >
-                    <Heart
-                    size={18}
-                    className={
-                        liked
-                        ? "fill-red-500 text-red-500"
-                        : ""
-                    }
-                    />
-
-                    Wishlist
-                </button>
-
-                <button className="flex flex-1 items-center justify-center gap-2 rounded-lg border py-3 text-sm font-medium hover:bg-gray-50">
-                    <Share2 size={18} />
-                    Share
-                </button>
-
-                </div> */}
 
             </div>
             </div>
@@ -376,36 +195,6 @@ useEffect(() => {
                 <p className="mt-4 leading-7 text-gray-600">
                 {product[0]?.description}
                 </p>
-
-                {/* Specifications */}
-                {/* <div className="mt-6">
-
-                <h3 className="font-semibold text-gray-900">
-                    Specifications
-                </h3>
-
-                <div className="mt-4 divide-y rounded-lg border">
-
-                    {product.specifications.map(
-                    ([label, value]) => (
-                        <div
-                        key={label}
-                        className="grid grid-cols-2 px-4 py-3 text-sm"
-                        >
-                        <span className="text-gray-500">
-                            {label}
-                        </span>
-
-                        <span className="font-medium text-gray-900">
-                            {value}
-                        </span>
-                        </div>
-                    )
-                    )}
-
-                </div>
-
-                </div> */}
             </section>
 
             {/* Seller */}
@@ -431,8 +220,6 @@ useEffect(() => {
                         size={14}
                         className="fill-yellow-400 text-yellow-400"
                     />
-
-                    {/* {product.vendor.rating} */}
                     </div>
                 </div>
 
@@ -441,7 +228,6 @@ useEffect(() => {
                 <div className="my-5 border-t" />
 
                 <p className="text-sm text-gray-500">
-                {/* {product.vendor.products} products listed */}
                 </p>
 
                 <button 
