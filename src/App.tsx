@@ -73,9 +73,7 @@ const AdminAlumniRosterPage = lazy(
 );
 const ManageJobs = lazy(() => import("./pages/admin/ManageJobs"));
 const ManageEvents = lazy(() => import("./pages/admin/ManageEvents"));
-const ManageDepartments = lazy(
-  () => import("./pages/admin/ManageDepartments"),
-);
+const ManageDepartments = lazy(() => import("./pages/admin/ManageDepartments"));
 const AdminAnalyticsPage = lazy(
   () => import("./pages/admin/AdminAnalyticsPage"),
 );
@@ -182,14 +180,15 @@ const AppRoutes = () => (
       }
     />
 
-    <Route
+    {/* <Route
       path="/verify-2fa"
       element={
         <GuestRoute>
           <TwoFactorPage />
         </GuestRoute>
       }
-    />
+    /> */}
+    <Route path="/verify-2fa" element={<TwoFactorPage />} />
 
     <Route
       path="/change-password"
@@ -229,7 +228,7 @@ const AppRoutes = () => (
         </ProtectedRoute>
       }
     />
-        <Route
+    <Route
       path="/alumni/my_businesses"
       element={
         <ProtectedRoute>
@@ -238,7 +237,7 @@ const AppRoutes = () => (
       }
     />
 
-    <Route 
+    <Route
       path="/alumni/business_details/:business_id"
       element={
         <ProtectedRoute>
@@ -255,7 +254,7 @@ const AppRoutes = () => (
         </ProtectedRoute>
       }
     />
-      <Route
+    <Route
       path="/alumni/product_details/:product_id"
       element={
         <ProtectedRoute>
@@ -314,7 +313,7 @@ const AppRoutes = () => (
         </ProtectedRoute>
       }
     />
- <Route
+    <Route
       path="/student/businesses"
       element={
         <ProtectedRoute>
@@ -414,14 +413,14 @@ const AppRoutes = () => (
         </AdminRoute>
       }
     />
-      <Route
-        path="/admin/alumni-roster"
-        element={
+    <Route
+      path="/admin/alumni-roster"
+      element={
         <AdminRoute>
-            <AdminAlumniRosterPage />
+          <AdminAlumniRosterPage />
         </AdminRoute>
       }
-/>
+    />
     <Route
       path="/profile"
       element={

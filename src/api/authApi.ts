@@ -34,6 +34,7 @@ export interface TwoFactorChallenge {
 export async function loginRawApi(
   email: string,
   password: string,
+  trustedDeviceToken?: string,
 ): Promise<
   | { twoFactorRequired: false; user: AuthUser; mustChangePassword: boolean }
   | TwoFactorChallenge
@@ -48,7 +49,7 @@ export async function loginRawApi(
     destination?: string;
     codeExpiresInSeconds?: number;
     devCode?: string;
-  }>("/login", { email, password });
+  }>("/login", { email, password, trustedDeviceToken });
 
   if (data.twoFactorRequired) {
     return {
@@ -66,14 +67,20 @@ export async function loginRawApi(
   return {
     twoFactorRequired: false,
     user: { ...data.user, token: data.token },
-    mustChangePassword: data.mustChangePassword === true || !!data.user.mustChangePassword,
+    mustChangePassword:
+      data.mustChangePassword === true || !!data.user.mustChangePassword,
   };
 }
 
 export async function verifyTwoFactorApi(
   twoFactorToken: string,
   code: string,
-): Promise<{ user: AuthUser; mustChangePassword: boolean }> {
+): Promise<{
+  user: AuthUser;
+  mustChangePassword: boolean;
+  trustedDeviceToken?: string;
+  trustedDeviceExpiresAt?: string;
+}> {
   const { data } = await api.post<{
     user?: User;
     token?: string;
@@ -81,16 +88,20 @@ export async function verifyTwoFactorApi(
     mustChangePassword?: boolean;
     twoFactorRequired?: boolean;
     attemptsLeft?: number;
+    trustedDeviceToken?: string;
+    trustedDeviceExpiresAt?: string;
   }>("/login/verify-2fa", { twoFactorToken, code });
   if (!data.user || !data.token) {
     throw new Error(data.message || "Incorrect code.");
   }
   return {
     user: { ...data.user, token: data.token },
-    mustChangePassword: data.mustChangePassword === true || !!data.user.mustChangePassword,
+    mustChangePassword:
+      data.mustChangePassword === true || !!data.user.mustChangePassword,
+    trustedDeviceToken: data.trustedDeviceToken,
+    trustedDeviceExpiresAt: data.trustedDeviceExpiresAt,
   };
 }
-
 export async function resendTwoFactorApi(
   twoFactorToken: string,
 ): Promise<{ codeExpiresInSeconds: number; devCode?: string }> {

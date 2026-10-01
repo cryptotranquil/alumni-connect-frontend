@@ -10,12 +10,14 @@ import { AuthContext, type User } from "./AuthContextValue";
 export type { AuthContextType, User, UserRole } from "./AuthContextValue";
 
 const STORAGE_KEY = "alumniConnectUser";
+const TRUSTED_KEY = "alumniConnectTrustedDevice";
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
     const stored = localStorage.getItem(STORAGE_KEY);
     localStorage.removeItem("ac_user");
 
@@ -38,15 +40,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         headers: { Authorization: `Bearer ${parsed?.token}` },
       })
       .then(() => {
-        setUser(parsed);
+        if (!cancelled) setUser(parsed);
       })
       .catch(() => {
-        localStorage.removeItem(STORAGE_KEY);
-        setUser(null);
+        if (cancelled) return;
+
+        const current = localStorage.getItem(STORAGE_KEY);
+        if (!current) return;
+        try {
+          const cur = JSON.parse(current);
+          if (cur?.token === parsed?.token) {
+            localStorage.removeItem(STORAGE_KEY);
+            setUser(null);
+          }
+        } catch {
+          /* ignore */
+        }
       })
       .finally(() => {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const persist = (u: User) => {
@@ -61,7 +78,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = async (email: string, password: string) => {
     try {
-      const result = await loginRawApi(email, password);
+      const trusted = localStorage.getItem(TRUSTED_KEY) || undefined;
+      const result = await loginRawApi(email, password, trusted);
       if (result.twoFactorRequired) {
         return result;
       }
@@ -83,11 +101,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   /** Submit the emailed 6-digit code for a login started by `login()`. */
   const completeLogin = async (twoFactorToken: string, code: string) => {
     try {
-      const { user: authUser, mustChangePassword } = await verifyTwoFactorApi(
-        twoFactorToken,
-        code,
-      );
+      const {
+        user: authUser,
+        mustChangePassword,
+        trustedDeviceToken,
+      } = await verifyTwoFactorApi(twoFactorToken, code);
       persist({ ...authUser, token: authUser.token, mustChangePassword });
+      if (trustedDeviceToken) {
+        localStorage.setItem(TRUSTED_KEY, trustedDeviceToken);
+      }
       return { mustChangePassword, user: authUser };
     } catch (e) {
       throw new Error(getErrorMessage(e, "Incorrect code."));

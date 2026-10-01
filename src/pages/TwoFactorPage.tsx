@@ -54,12 +54,11 @@ const TwoFactorPage = () => {
     try {
       const { user } = await completeLogin(token, code);
       if (state.requireAdmin && user.role !== "admin") {
-        // Correct code, wrong portal — don't leave an admin-portal session
-        // sitting around for a non-admin account.
         logout();
         navigate("/admin/login", { replace: true });
         return true;
       }
+      navigate(state.redirectTo || "/dashboard", { replace: true });
       return true;
     } catch {
       return false;
